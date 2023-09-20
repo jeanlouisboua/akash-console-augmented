@@ -8,6 +8,7 @@ import { DirectSecp256k1HdWallet, Registry } from '@cosmjs/proto-signing';
 
 let onboarding: any;
 let accounts: any;
+let mnemonic: any;
 const { ethereum } = window;
 const currentUrl = new URL(window.location.href);
 const forwarderOrigin = currentUrl.hostname === 'localhost' ? 'http://localhost:3000' : undefined;
@@ -15,7 +16,6 @@ const forwarderOrigin = currentUrl.hostname === 'localhost' ? 'http://localhost:
 export function useMetamaskWallet(){
     const [keplr, setKeplr] = useRecoilState(keplrState);
     const isConnected = keplr.isSignedIn;
-    //const [, setShowKeplrPopup] = useRecoilState(showKeplrWindow);
 
     const initialize = async () => {
         try {
@@ -26,7 +26,7 @@ export function useMetamaskWallet(){
     
         if (isMetaMaskInstalled()) {
             console.log('Metamask is already installed');
-            handleNewAccounts();
+            //handleNewAccounts();
         } else {
           onboarding.startOnboarding();
         }
@@ -42,10 +42,12 @@ export function useMetamaskWallet(){
         if (accounts && accounts.length > 0) {
           const wallet = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, { prefix: "akash" });
           const cosmosAccounts = await wallet.getAccounts();
+          
           console.log("accountsList", cosmosAccounts);
           setKeplr({
             accounts:[...cosmosAccounts],
             isSignedIn: true,
+            isConnecting: false
           });
           console.log("keplr object", keplr);
             localStorage.setItem('walletConnected', 'true');
@@ -54,45 +56,55 @@ export function useMetamaskWallet(){
             ethereum.on('networkChanged', handleNewNetwork)*/
             ethereum?.on('accountsChanged', handleNewAccounts);
             console.log('Metamask sucessfully connected ! ');
-        } else {
+        } /*else {
             console.log('Metamask Disconnected ! ');
-            //setAuth(false);
             setKeplr({
               isSignedIn: false,
               accounts: [],
+              isConnecting: false
             });
             localStorage.setItem('walletConnected', 'false');
-        }
+        }*/
     }
 
     const connectWallet = async() => {
-          await initialize();
-          accounts = await ethereum?.request({
-            method: 'wallet_requestPermissions',
-            params: [{
-                eth_accounts: {}
-            }]
-        }).then(() => ethereum.request({
-            method: 'eth_requestAccounts'
-        }));
-        /*const provider = new ethers.BrowserProvider(ethereum!);
-        const offlineSigner = provider.getSigner();
-        const network = await provider.getNetwork();
-        const balance = await provider.getBalance(accounts[0]);
-        console.log("Balance", balance);*/
-        const msg = 'Akash console want to verify your identity, it\'s mandatory to approve.';
-        const from = accounts[0];
-        const sign = await ethereum?.request({
-          method: 'personal_sign',
-          params: [msg, from],
+      try {
+        await initialize();
+        accounts = await ethereum?.request({
+          method: 'wallet_requestPermissions',
+          params: [{
+              eth_accounts: {}
+          }]
+      }).then(() => ethereum.request({
+          method: 'eth_requestAccounts'
+      }));
+      /*const provider = new ethers.BrowserProvider(ethereum!);
+      const offlineSigner = provider.getSigner();
+      const network = await provider.getNetwork();
+      const balance = await provider.getBalance(accounts[0]);
+      console.log("Balance", balance);*/
+      const msg = 'Akash console want to verify your identity, it\'s mandatory to approve.';
+      const from = accounts[0];
+      const sign = await ethereum?.request({
+        method: 'personal_sign',
+        params: [msg, from],
+      });
+      console.log(sign);
+     const hash = ethers.keccak256(ethers.toUtf8Bytes(msg))
+     const entropy = hash.slice(2);
+      console.log("Entropy: "+entropy);
+      mnemonic = bip39.entropyToMnemonic(entropy);
+      console.log(mnemonic);
+      handleNewAccounts(accounts, mnemonic); 
+      } catch (error) {
+        console.log(error);
+        setKeplr({
+          isSignedIn: false,
+          accounts: [],
+          isConnecting: false
         });
-        console.log(sign);
-       const hash = ethers.keccak256(ethers.toUtf8Bytes(msg))
-       const entropy = hash.slice(2);
-        console.log("Entropy: "+entropy);
-        const mnemonic = bip39.entropyToMnemonic(entropy);
-        console.log(mnemonic);
-        handleNewAccounts(accounts, mnemonic);
+      }
+      
     };
     
       const disconnectWallet = () => {

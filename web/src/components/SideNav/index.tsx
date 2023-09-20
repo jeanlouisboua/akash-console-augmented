@@ -13,6 +13,7 @@ import IconButton from '@mui/material/IconButton';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import AddIcon from '@mui/icons-material/Add';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import Stack from '@mui/material/Stack';
 import { appVersion } from '../../recoil/atoms';
 import { Icon } from '../Icons';
@@ -24,11 +25,11 @@ import { showKeplrWindow, keplrState } from '../../recoil/atoms';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import Loading from '../Loading';
 
-import List from '@mui/material/List';
+/*import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemButton from '@mui/material/ListItemButton';
-import ListItemText from '@mui/material/ListItemText';
+import ListItemText from '@mui/material/ListItemText';*/
 import { WalletDialog } from '../WalletDialog';
 import { IconMetamask, IconKeplr, IconLogoAkash } from '../Icons';
 import { shortenString } from '../../_helpers/addresses';
@@ -36,8 +37,7 @@ import Blockies from 'react-18-blockies';
 import { getAccountBalance } from '../../recoil/api/bank';
 import { uaktToAKT } from '../../_helpers/lease-calculations';
 
-
-const wallets = ['Keplr', 'Metamask'];
+/*const wallets = ['Keplr', 'Metamask'];
 
 const getIcon = (wallet: String) => {
   switch (wallet) {
@@ -48,7 +48,7 @@ const getIcon = (wallet: String) => {
     default:
       return null
   }
-};
+};*/
 
 export default function SideNav(props: any) {
   const { children } = props;
@@ -56,8 +56,8 @@ export default function SideNav(props: any) {
   const [open, setOpen] = React.useState(false);
   const location = useLocation();
   const pathnames = location.pathname.split('/').filter((x) => x);
-  const wallet = useWallet();
-  const metamaskWallet = useMetamaskWallet();
+  //const wallet = useWallet();
+ // const metamaskWallet = useMetamaskWallet();
   const [isHelpCenterOpen, setIsHelpCenterOpen] = useState(false);
   const [, setShowKeplrPopup] = useRecoilState(showKeplrWindow);
 
@@ -67,18 +67,18 @@ export default function SideNav(props: any) {
 
 
   React.useEffect(() => {
-    if (!window.keplr) return;
+    //if (!window.keplr) return;
     if (keplr.isSignedIn && keplr?.accounts[0]?.address) {
       const account = keplr.accounts[0].address;
       getAccountBalance(account).then((result) => {
         const akt = uaktToAKT(result);
         setBalance(akt);
       });
+      setOpenMenu(false);
     }
   }, [keplr]);
 
-
-  const handleListItemClick = (value: string) => {
+  /*const handleListItemClick = (value: string) => {
     switch (value) {
       case 'Keplr':
         wallet.connect();
@@ -90,7 +90,7 @@ export default function SideNav(props: any) {
         break;
     }
 
-  };
+  };*/
 
   const handleDisconnectWallet = () => {
     localStorage.setItem('walletConnected', 'false');
@@ -98,17 +98,18 @@ export default function SideNav(props: any) {
       isSignedIn: false,
       accounts: [],
     });
-    handleClose();
-  };
-
-  const handleClick = () => {
-     setOpenMenu(true);
-   // wallet.connect();
-  };
-
-  const handleClose = () => {
     setOpenMenu(false);
   };
+
+  const openDialog = () => {
+     setOpenMenu(true);
+  };
+
+  const closeDialog = () => {
+    setOpenMenu(false);
+  };
+
+  
 
   const toggleHelpCenter = useCallback(() => {
     setIsHelpCenterOpen((prevIsOpen: boolean) => !prevIsOpen);
@@ -173,15 +174,14 @@ export default function SideNav(props: any) {
             ))}
           </Breadcrumbs>
           <div className="grow">{/* flex grow spacer */}</div>
-          {wallet.isConnected ? (
+          {keplr.isSignedIn && keplr?.accounts[0]?.address/*wallet.isConnected*/ ? (
             <>
-              <Stack direction='row' justifyContent='center' spacing={1} sx={{ mr: '20px' }}>
+              <Stack direction='row' justifyContent='center' alignItems='center' spacing={1} sx={{ mr: '20px' }}>
                 <Avatar>
                   <Blockies
                     seed={keplr?.accounts[0]?.address}
                     size={10}
                     scale={4}
-
                     className="identicon"
                   />
                 </Avatar>
@@ -194,8 +194,14 @@ export default function SideNav(props: any) {
                     label={balance + " AKT"}
                     variant="outlined"
                   />
-
                 </Box>
+                <Divider orientation="vertical" variant="middle" flexItem />
+                <Button variant="outlined" size='small' sx={{height: '38px', pr:'20px'}}>
+                <Box marginRight="0.5rem">
+                  <AccountBalanceIcon sx={{height:'20px'}}/>
+                </Box>
+                Fund
+              </Button>
               </Stack>
               <Button variant="outlined" onClick={handleDisconnectWallet}>
                 <Box marginRight="0.5rem">
@@ -209,13 +215,18 @@ export default function SideNav(props: any) {
             <>
               <Button
                 variant="outlined"
-                onClick={handleClick}>
+                onClick={openDialog}>
                 <Box marginRight="0.5rem">
                   <Icon type="wallet" />
                 </Box>
                 Connect Wallet
               </Button>
-              <WalletDialog
+               <WalletDialog  
+               open={openMenu}
+               close={closeDialog}
+               //onClose={handleClose}
+              />
+         {/*      <WalletDialog
                 close={handleClose}
                 open={openMenu}
                 title='Choose your wallet'
@@ -232,7 +243,7 @@ export default function SideNav(props: any) {
                     </ListItem>
                   ))}
                 </List>
-              </WalletDialog>
+              </WalletDialog> */}
 
               <StyledHelpIcon onClick={handleShowKeplrHelp} />
             </>

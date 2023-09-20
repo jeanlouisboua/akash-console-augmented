@@ -16,6 +16,11 @@ import { createCertificate } from '@akashnetwork/akashjs/build/certificates';
 import crypto from 'crypto-js';
 import { toBase64 } from 'pvutils';
 
+import { Registry } from "@cosmjs/proto-signing";
+import { SigningStargateClient} from "@cosmjs/stargate";
+import { getAkashTypeRegistry} from "@akashnetwork/akashjs/build/stargate";
+
+
 export interface CertificateFilter {
   owner: string;
   serial?: string;
@@ -45,8 +50,24 @@ function getTypeUrl<T extends {$type: string}>(type: T) {
 }
 
 export const createAndBroadcastCertificate = async (rpcEndpoint: string, wallet: any) => {
-  const signer = wallet.offlineSigner;
-  const client = await getMsgClient(rpcEndpoint, signer);
+  let client: any;
+  if(wallet.offlineSigner){
+    const signer = wallet.offlineSigner;
+    client = await getMsgClient(rpcEndpoint, signer); 
+  }else{
+    const myRegistry = new Registry(
+      getAkashTypeRegistry()
+  );
+  
+  client = await SigningStargateClient.connectWithSigner(
+      rpcEndpoint,
+      wallet,
+      {
+        registry: myRegistry
+      }
+  );
+  }
+  
   const certificate = await createCertificate(wallet.accounts[0].address);
   const [account] = wallet.accounts;
 

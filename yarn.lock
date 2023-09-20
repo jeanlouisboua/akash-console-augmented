@@ -17,10 +17,10 @@
   resolved "https://registry.yarnpkg.com/@adraffy/ens-normalize/-/ens-normalize-1.9.2.tgz#60111a5d9db45b2e5cbb6231b0bb8d97e8659316"
   integrity sha512-0h+FrQDqe2Wn+IIGFkTCd4aAwTJ+7834Ek1COohCyV26AXhwQ7WQaz+4F/nLOeVl/3BtWHOHLPsq46V8YB46Eg==
 
-"@akashnetwork/akashjs@^0.4.17":
-  version "0.4.17"
-  resolved "https://registry.yarnpkg.com/@akashnetwork/akashjs/-/akashjs-0.4.17.tgz#7dda5d829f825b0558d26a6a54a13d4a95f39813"
-  integrity sha512-jA9E1e26MtU8PT79frdWqNrXICWeY9I2H29UEuh4Xey9p+ZQKY5GheHNd7nfX9H/m2UIrlh4gZo6u9JoMjJo/A==
+"@akashnetwork/akashjs@^0.4.18":
+  version "0.4.18"
+  resolved "https://registry.yarnpkg.com/@akashnetwork/akashjs/-/akashjs-0.4.18.tgz#2bb0bf9f703e4ddb959b3526ca682c153a272d08"
+  integrity sha512-bkj2WWZ3+9EytM++hgYxCucHvSgM3KBcq86gCJdo+HB1EgtvGoQcsge0MyH+Opgjgm7TW/AUPbIW41CxLjrlmg==
   dependencies:
     "@cosmjs/launchpad" "^0.27.0"
     "@cosmjs/proto-signing" "^0.28.11"
@@ -11522,6 +11522,11 @@ react-scripts@5.0.1:
     workbox-webpack-plugin "^6.4.1"
   optionalDependencies:
     fsevents "^2.3.2"
+
+react-spinners@^0.13.8:
+  version "0.13.8"
+  resolved "https://registry.yarnpkg.com/react-spinners/-/react-spinners-0.13.8.tgz#5262571be0f745d86bbd49a1e6b49f9f9cb19acc"
+  integrity sha512-3e+k56lUkPj0vb5NDXPVFAOkPC//XyhKPJjvcGjyMNPWsBKpplfeyialP74G7H7+It7KzhtET+MvGqbKgAqpZA==
 
 react-textarea-autosize@^8.3.2:
   version "8.5.2"

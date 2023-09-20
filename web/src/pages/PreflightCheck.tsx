@@ -22,6 +22,7 @@ import { getRpcNode } from '../hooks/useRpcNode';
 import { createCertificate } from '../api/mutations';
 import logging from '../logging';
 import { loadActiveCertificate } from '../api/rpc/beta3/certificates';
+import { WalletDialog } from '../components/WalletDialog';
 
 export const PreflightCheck: React.FC<Record<string, never>> = () => {
   const [keplr] = useRecoilState(keplrState);
@@ -43,6 +44,12 @@ export const PreflightCheck: React.FC<Record<string, never>> = () => {
   const { networkType } = getRpcNode();
   const { mutate: mxCreateCertificate, isLoading } = useMutation(['createCertificate'], createCertificate);
   const savedSDL = useRecoilValue(deploymentSdl);
+
+  const [openMenu, setOpenMenu] = React.useState(false);
+
+  const closeDialog = () => {
+    setOpenMenu(false);
+  };
 
   const hasKeplr = window.keplr !== undefined;
   const sdl = values.sdl || savedSDL;
@@ -128,13 +135,14 @@ export const PreflightCheck: React.FC<Record<string, never>> = () => {
 
   /* Check the current balance of the wallet */
   React.useEffect(() => {
-    if (!window.keplr) return;
+  //  if (!window.keplr) return;
     if (keplr.isSignedIn && keplr?.accounts[0]?.address) {
       const account = values.depositor || keplr.accounts[0].address;
       getAccountBalance(account).then((result) => {
         const akt = uaktToAKT(result);
         setBalance(akt);
       });
+      setOpenMenu(false);
     }
   }, [keplr, values.depositor]);
 
@@ -142,6 +150,11 @@ export const PreflightCheck: React.FC<Record<string, never>> = () => {
   const handleCreateCertificate = async () => {
     // the query doesn't take any arguments, this little hack keeps
     // typescript happy
+    if (!keplr.isSignedIn && !keplr?.accounts[0]?.address ) {
+      setOpenMenu(true);
+      return;
+    }
+    console.log("creation in progress......");
     mxCreateCertificate(({} as any), {
       onSuccess: async (result: any) => {
         setCertificate(await loadActiveCertificate(keplr?.accounts[0]?.address));
@@ -369,6 +382,11 @@ export const PreflightCheck: React.FC<Record<string, never>> = () => {
           Next
         </Button>
       </DeploymentAction>
+      <WalletDialog  
+        open={openMenu}
+        close={closeDialog}
+        onClose={handleCreateCertificate}
+      />
     </Box>
   );
 };

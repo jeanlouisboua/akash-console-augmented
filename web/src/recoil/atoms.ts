@@ -15,6 +15,7 @@ export interface KeplrWallet {
   cosmosClient?: CosmosClient;
   isSignedIn: boolean;
   file?: string;
+  isConnecting?: boolean;
 }
 
 // Deprecated. Use getRpcNode instead.
@@ -55,8 +56,10 @@ export const keplrState = atom<KeplrWallet>({
     cosmosClient: undefined,
     isSignedIn: JSON.parse(localStorage.walletConnected || 'false'),
     file: '',
+    isConnecting: false
   },
 });
+
 
 // TODO: Don't think this is used anymore. Validate and remove if so.
 export const rpcState = atom({

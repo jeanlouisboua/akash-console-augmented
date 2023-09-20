@@ -2,3 +2,4 @@
 
 declare module 'lodash';
 declare module 'datedash';
+declare module '@cosmjs/proto-signing';

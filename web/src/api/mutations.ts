@@ -6,6 +6,10 @@ import { getKeplr } from '../_helpers/keplr-utils';
 import { getCurrentHeight } from '../_helpers/deployments-utils';
 import { SDLSpec } from '../components/SdlConfiguration/settings';
 
+import { useRecoilValue } from 'recoil';
+import { keplrState } from '../recoil/atoms';
+import { WalletDialog } from '../components/WalletDialog';
+
 export const closeDeployment = async (dseq: string) => {
   const { networkType } = getRpcNode();
   const wallet = await getKeplr();
@@ -51,8 +55,9 @@ export const createDeployment = async (
 
 export const createCertificate = async () => {
   const { rpcNode, networkType } = getRpcNode();
-  const wallet = await getKeplr();
-
+  //const wallet = await getKeplr();
+  const wallet = useRecoilValue(keplrState);
+  
   const mutateMethod = networkType === 'testnet'
     ? beta3.certificates.createAndBroadcastCertificate
     : beta2.certificates.createAndBroadcastCertificate;
