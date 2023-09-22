@@ -34,6 +34,7 @@ const ReDeploy: React.FC<any> = () => {
     isLoading: progressVisible,
     data: result,
   } = useMutation(createDeployment);
+  const keplr = useRecoilValue(keplrState);
 
   const appCache = dseq ? localStorage.getItem(dseq) : null;
 
@@ -42,11 +43,11 @@ const ReDeploy: React.FC<any> = () => {
   const handleSubmit = async (values: InitialValuesProps) => {
     setCardMessage('Creating deployment');
     setAppData({ name: values.appName, sdl: values.sdl });
-    mxCreateDeployment({ sdl: values.sdl });
+    mxCreateDeployment({wallet: keplr, sdl: values.sdl });
   };
 
   const handleSave = (sdl: SDLSpec) => {
-    mxCreateDeployment({ sdl }); // Trigger the deployment mutation
+    mxCreateDeployment({keplr, sdl } as any); // Trigger the deployment mutation
   };
 
   React.useEffect(() => {

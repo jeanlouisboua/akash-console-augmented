@@ -186,7 +186,7 @@ const DeploymentStepper: React.FC<DeploymentStepperProps> = () => {
           // it uses the useFormikContext hook.
           // const { submitForm } = useFormikContext();
           setCardMessage('Creating deployment');
-          mxCreateDeployment({ sdl: value.sdl, depositor: value.depositor })
+          mxCreateDeployment({wallet: keplr, sdl: value.sdl, depositor: value.depositor })
             .then(async (result) => {
               if (result && result.deploymentId) {
                 setDeploymentId(result.deploymentId);

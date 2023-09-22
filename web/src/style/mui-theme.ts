@@ -71,9 +71,12 @@ export const muiTheme = createTheme({
     MuiListItemButton:{
       styleOverrides:{
         root:{
-         // border: '1px solid #666666',
+          border: '1px solid #66666615',
           backgroundColor: '#66666615',
           borderRadius: 6,
+          '&:hover': {
+            border: '1px solid #FA5757',
+          },
         }
       }
     }

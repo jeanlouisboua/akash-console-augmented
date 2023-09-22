@@ -103,7 +103,7 @@ const CustomApp: React.FC = () => {
             }
 
             mxCreateDeployment(
-              { sdl: values.sdl },
+              {wallet: keplr, sdl: values.sdl },
               {
                 onSuccess: (result) => {
                   if (result && result.deploymentId) {

@@ -16,15 +16,28 @@ import ListItem from '@mui/material/ListItem';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
+import Slide from '@mui/material/Slide';
+import { TransitionProps } from '@mui/material/transitions';
 
 import { useWallet } from "../../hooks/useWallet";
 import { useMetamaskWallet } from "../../hooks/useMetamaskWallet";
 import { useRecoilState } from 'recoil';
 import { keplrState } from '../../recoil/atoms';
 
+import { Text, Title } from '../../components/Text';
 import { IconKeplr, IconMetamask } from "../Icons";
 import React, { useEffect } from 'react';
+
 const wallets = ['Keplr', 'Metamask'];
+
+const Transition = React.forwardRef(function Transition(
+  props: TransitionProps & {
+    children: React.ReactElement<any, any>;
+  },
+  ref: React.Ref<unknown>,
+) {
+  return <Slide direction="down" ref={ref} {...props} />;
+});
 
 const getIcon = (wallet: String) => {
   switch (wallet) {
@@ -89,7 +102,7 @@ export const WalletDialog = (props: DialogProps) => {
 
   return (
     <MuiDialog
-    
+      TransitionComponent={Transition}
       fullWidth={true}
       maxWidth="xs"
       disableEscapeKeyDown={true}
@@ -106,9 +119,9 @@ export const WalletDialog = (props: DialogProps) => {
         >
           <NavigateBeforeIcon />
         </IconButton> : 
-         <Typography variant='h5' sx={{fontWeight:'medium'}}>
+         <Title size={24}>
            Choose your wallet
-         </Typography>
+         </Title>
         }
          </DialogTitle>
       <IconButton
@@ -135,13 +148,16 @@ export const WalletDialog = (props: DialogProps) => {
             aria-label='Loading Spinner'
             />
           </Stack>
-          <Typography variant='h6' sx={{mt:'20px', mb:'10px'}}>
+          <Stack  spacing={2} alignItems={'center'} sx={{mt:'20px'}}>
+          <Title size={18}>
             Connecting your wallet...
-          </Typography>
+          </Title>
     
-         <Typography variant='subtitle1'>
+         <Text size={14}>
          Connect your wallet through the {selectedWallet} pop-up
-     </Typography>
+         </Text>
+          </Stack>
+      
          </Box>
       
         : 

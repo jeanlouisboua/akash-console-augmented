@@ -42,7 +42,8 @@ export const PreflightCheck: React.FC<Record<string, never>> = () => {
   const [showVerifiedCert, setShowVerifiedCert] = React.useState(false);
   const [useAuthorizedDepositor, setUseAuthorizedDepositor] = React.useState(false);
   const { networkType } = getRpcNode();
-  const { mutate: mxCreateCertificate, isLoading } = useMutation(['createCertificate'], createCertificate);
+  //const { mutate: mxCreateCertificate, isLoading } = useMutation(['createCertificate'], createCertificate);
+  const { mutate: mxCreateCertificate, isLoading } = useMutation(createCertificate);
   const savedSDL = useRecoilValue(deploymentSdl);
 
   const [openMenu, setOpenMenu] = React.useState(false);
@@ -69,8 +70,9 @@ export const PreflightCheck: React.FC<Record<string, never>> = () => {
   };
 
   const handleConnectWallet = async () => {
-    if (!wallet.isConnected) {
-      wallet.connect();
+    if (!wallet.isConnected) { //change this to global wallet
+      //wallet.connect();
+      setOpenMenu(true);
     }
   };
 
@@ -154,8 +156,9 @@ export const PreflightCheck: React.FC<Record<string, never>> = () => {
       setOpenMenu(true);
       return;
     }
+    //if keplr.offlineSigner || keplr.cosmosClient
     console.log("creation in progress......");
-    mxCreateCertificate(({} as any), {
+    mxCreateCertificate((/*{} as any*/ keplr), {
       onSuccess: async (result: any) => {
         setCertificate(await loadActiveCertificate(keplr?.accounts[0]?.address));
         setShowVerifiedCert(true);
@@ -385,7 +388,7 @@ export const PreflightCheck: React.FC<Record<string, never>> = () => {
       <WalletDialog  
         open={openMenu}
         close={closeDialog}
-        onClose={handleCreateCertificate}
+        //onClose={handleCreateCertificate}
       />
     </Box>
   );

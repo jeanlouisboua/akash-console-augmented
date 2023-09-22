@@ -122,7 +122,7 @@ function TileCard(props: Props) {
 
         try {
           const result = mxCreateDeployment(
-            { sdl: value.sdl, depositor: value.depositor },
+            {wallet: keplr, sdl: value.sdl, depositor: value.depositor },
             {
               onSuccess: async (result) => {
                 if (result && result.deploymentId) {

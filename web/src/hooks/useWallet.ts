@@ -1,11 +1,13 @@
 import { useEffect } from 'react';
 import { useRecoilState } from 'recoil';
-import { keplrState, showKeplrWindow } from '../recoil/atoms';
+import { keplrState, showKeplrWindow, activeCertificate } from '../recoil/atoms';
+import { loadActiveCertificate } from '../recoil/api';
 import { getKeplr } from '../_helpers/keplr-utils';
 import logging from '../logging';
 
 export function useWallet() {
   const [keplr, setKeplr] = useRecoilState(keplrState);
+  const [certificate, setCertificate] = useRecoilState(activeCertificate);
   const isConnected = keplr.isSignedIn;
   const [, setShowKeplrPopup] = useRecoilState(showKeplrWindow);
 
@@ -28,7 +30,11 @@ export function useWallet() {
     }
 
     getKeplr()
-      .then((res) => {
+      .then(async(res) => {
+        const activeCert = await loadActiveCertificate(res.accounts[0].address);
+        if (activeCert.$type === 'TLS Certificate') {
+          setCertificate(activeCert);
+        }
         setKeplr(res);
         localStorage.setItem('walletConnected', 'true');
       })

@@ -21,6 +21,7 @@ import { SigningStargateClient} from "@cosmjs/stargate";
 import { getAkashTypeRegistry} from "@akashnetwork/akashjs/build/stargate";
 
 
+
 export interface CertificateFilter {
   owner: string;
   serial?: string;
@@ -50,24 +51,39 @@ function getTypeUrl<T extends {$type: string}>(type: T) {
 }
 
 export const createAndBroadcastCertificate = async (rpcEndpoint: string, wallet: any) => {
-  let client: any;
-  if(wallet.offlineSigner){
-    const signer = wallet.offlineSigner;
+  let client: SigningStargateClient;
+  let fee: any;
+  const signer = wallet.offlineSigner;
+  if (wallet.cosmosClient) {
     client = await getMsgClient(rpcEndpoint, signer); 
-  }else{
+    fee = 'auto';
+  } else {
     const myRegistry = new Registry(
       getAkashTypeRegistry()
-  );
-  
-  client = await SigningStargateClient.connectWithSigner(
+    );
+    console.log("registry", myRegistry);
+    client = await SigningStargateClient.connectWithSigner(
       rpcEndpoint,
-      wallet,
+      signer,
       {
         registry: myRegistry
+      
       }
-  );
+    );
+    console.log("Client",client);
+    fee = {
+      amount: [
+          {
+              denom: "uakt",
+              amount: "20000",
+          },
+      ],
+      gas: "800000",
+    };
   }
-  
+
+
+ 
   const certificate = await createCertificate(wallet.accounts[0].address);
   const [account] = wallet.accounts;
 
@@ -80,7 +96,7 @@ export const createAndBroadcastCertificate = async (rpcEndpoint: string, wallet:
     }),
   };
 
-  const tx = await client.signAndBroadcast(account.address, [msg], 'auto', 'Create new certificate');
+  const tx = await client.signAndBroadcast(account.address, [msg], fee, 'Create new certificate');
 
   if (tx.code !== undefined && tx.code === 0) {
     const idx = saveCertificate(wallet.accounts[0].address, certificate);

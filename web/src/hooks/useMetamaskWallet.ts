@@ -1,10 +1,13 @@
 import { useRecoilState } from 'recoil';
 import { MetaMaskSDK, SDKProvider } from '@metamask/sdk';
 import MetaMaskOnboarding from '@metamask/onboarding';
-import { keplrState } from '../recoil/atoms';
+import { keplrState, activeCertificate } from '../recoil/atoms';
+import { loadActiveCertificate } from '../recoil/api';
 import { ethers } from 'ethers';
 import * as bip39 from 'bip39';
 import { DirectSecp256k1HdWallet, Registry } from '@cosmjs/proto-signing';
+
+
 
 let onboarding: any;
 let accounts: any;
@@ -15,6 +18,7 @@ const forwarderOrigin = currentUrl.hostname === 'localhost' ? 'http://localhost:
 
 export function useMetamaskWallet(){
     const [keplr, setKeplr] = useRecoilState(keplrState);
+    const [certificate, setCertificate] = useRecoilState(activeCertificate);
     const isConnected = keplr.isSignedIn;
 
     const initialize = async () => {
@@ -44,11 +48,17 @@ export function useMetamaskWallet(){
           const cosmosAccounts = await wallet.getAccounts();
           
           console.log("accountsList", cosmosAccounts);
+          const activeCert = await loadActiveCertificate(cosmosAccounts[0].address);
+          if (activeCert.$type === 'TLS Certificate') {
+            setCertificate(activeCert);
+          }
           setKeplr({
             accounts:[...cosmosAccounts],
+            offlineSigner: wallet,
             isSignedIn: true,
             isConnecting: false
           });
+
           console.log("keplr object", keplr);
             localStorage.setItem('walletConnected', 'true');
             //ethereum.autoRefreshOnNetworkChange = false;
@@ -56,6 +66,8 @@ export function useMetamaskWallet(){
             ethereum.on('networkChanged', handleNewNetwork)*/
             ethereum?.on('accountsChanged', handleNewAccounts);
             console.log('Metamask sucessfully connected ! ');
+
+           
         } /*else {
             console.log('Metamask Disconnected ! ');
             setKeplr({
@@ -122,8 +134,4 @@ export function useMetamaskWallet(){
         connect: connectWallet,
         disconnect: disconnectWallet,
       };
-}
-
-function getAkashTypeRegistry(): any {
-  throw new Error('Function not implemented.');
 }

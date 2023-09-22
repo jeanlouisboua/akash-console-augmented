@@ -43,6 +43,12 @@ import logging from '../../../logging';
 import { getRpcNode } from '../../../hooks/useRpcNode';
 import { retry } from '../../../_helpers/async-utils';
 
+import { Registry } from "@cosmjs/proto-signing";
+import { SigningStargateClient} from "@cosmjs/stargate";
+import { getAkashTypeRegistry} from "@akashnetwork/akashjs/build/stargate";
+
+const AKASH_GAS_ADJUSTMENT = 1.15;
+
 // 5AKT aka 5000000uakt
 export const defaultInitialDeposit = 5000000;
 
@@ -283,16 +289,12 @@ export async function createDeployment(
   sdl: any,
   depositor: string | undefined = undefined
 ) {
+  let client: SigningStargateClient;
+  let fee: any;
   const [account] = wallet.accounts;
   const signer = wallet.offlineSigner;
   const { rpcNode } = getRpcNode();
   const status = await fetchRpcNodeStatus(rpcNode);
-
-  if (!signer) {
-    return Promise.reject('Unable to initialize signing client');
-  }
-
-  const client = await getMsgClient(rpcNode, signer);
   const groups = DeploymentGroups(sdl, 'beta3');
   const ver = await ManifestVersion(sdl, 'beta3');
 
@@ -317,7 +319,44 @@ export async function createDeployment(
 
   console.log(msg);
 
-  const tx = await client.signAndBroadcast(account.address, [msg], 'auto', 'Creating the deployment');
+  if (!signer) {
+    return Promise.reject('Unable to initialize signing client');
+  }
+
+  if ( wallet.cosmosClient) {
+    client = await getMsgClient(rpcNode, signer);
+    fee = 'auto';
+  } else {
+    const myRegistry = new Registry(
+      getAkashTypeRegistry()
+    );
+    client = await SigningStargateClient.connectWithSigner(
+      rpcNode,
+      signer,
+      {
+        registry: myRegistry
+      }
+    );
+    const gas = await client.simulate(
+      account.address,
+      [msg],
+      "Creating the deployment"
+    );
+    console.log("Estimated gas: ",gas);
+    const adjustedGAS = gas * AKASH_GAS_ADJUSTMENT;
+    console.log("Adjusted gas: ",adjustedGAS);
+    fee = {
+      amount: [
+          {
+              denom: "uakt",
+              amount: adjustedGAS,
+          },
+      ],
+      gas: "800000",
+    };
+  }
+ 
+  const tx = await client.signAndBroadcast(account.address, [msg], fee, 'Creating the deployment');
 
   return {
     deploymentId: {

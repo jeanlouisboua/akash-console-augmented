@@ -37,10 +37,10 @@ export const fundDeployment = async ({ dseq, amount }: { dseq: string, amount: n
 };
 
 export const createDeployment = async (
-  { sdl, depositor }: { sdl: SDLSpec | undefined; depositor?: string }
+  {wallet, sdl, depositor }: {wallet: any; sdl: SDLSpec | undefined; depositor?: string }
 ) => {
   const { networkType } = getRpcNode();
-  const wallet = await getKeplr();
+  //const wallet = await getKeplr();
 
   if (!sdl) {
     return Promise.reject('No SDL provided');
@@ -53,10 +53,10 @@ export const createDeployment = async (
   return mutateMethod(wallet, sdl, depositor);
 };
 
-export const createCertificate = async () => {
+export const createCertificate = async (wallet: any) => {
   const { rpcNode, networkType } = getRpcNode();
-  //const wallet = await getKeplr();
-  const wallet = useRecoilValue(keplrState);
+ // const wallet = await getKeplr();
+ console.log("wallet: ", wallet);
   
   const mutateMethod = networkType === 'testnet'
     ? beta3.certificates.createAndBroadcastCertificate
