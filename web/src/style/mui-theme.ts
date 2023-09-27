@@ -10,7 +10,7 @@ export const muiTheme = createTheme({
           },
           '& .MuiOutlinedInput-root input': {
             padding: '10px 16px',
-          },
+          },  
         },
       },
     },

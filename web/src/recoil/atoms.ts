@@ -54,7 +54,8 @@ export const keplrState = atom<KeplrWallet>({
     accounts: [] as AccountData[],
     offlineSigner: undefined,
     cosmosClient: undefined,
-    isSignedIn: JSON.parse(localStorage.walletConnected || 'false'),
+    //isSignedIn: JSON.parse(localStorage.walletConnected || 'false'),
+    isSignedIn: false,
     file: '',
     isConnecting: false
   },

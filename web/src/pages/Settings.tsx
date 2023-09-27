@@ -39,6 +39,7 @@ import testnetChainInfo from '../_helpers/testnet-chain';
 import sandboxChainInfo from '../_helpers/sandbox-chain';
 import { createCertificate, revokeCertificate } from '../api/mutations';
 import logging from '../logging';
+import { WalletDialog } from '../components/WalletDialog';
 
 type SortableCertificate = {
   available: boolean;
@@ -153,8 +154,15 @@ const Settings: React.FC<Record<string, never>> = () => {
   const [chainInfo, setChainInfo] = React.useState(getRpcNode());
   const { rpcNode, chainId } = chainInfo;
 
+  const [openMenu, setOpenMenu] = React.useState(false);
+
   const handleConnectWallet = (): void => {
-    wallet.connect();
+    //wallet.connect();
+    setOpenMenu(true);
+  };
+
+  const closeDialog = () => {
+    setOpenMenu(false);
   };
 
   const availableCertificates = useMemo(
@@ -189,7 +197,7 @@ const Settings: React.FC<Record<string, never>> = () => {
     setShowProgress(true);
     // the query doesn't take any arguments, this little hack keeps
     // typescript happy
-    mxCreateCertificate(({} as any), {
+    mxCreateCertificate((/*{} as any*/keplr), {
       onSuccess: () => {
         refetch();
         setCreateOpen(false);
@@ -352,6 +360,12 @@ const Settings: React.FC<Record<string, never>> = () => {
     ];
     setFields(_fields);
   }, [chainId, certificatesList]);
+
+  React.useEffect(() => {
+      if (keplr.isSignedIn && keplr?.accounts[0]?.address) {
+        setOpenMenu(false);
+      }
+    }, [keplr]);
 
   return (
     <Grid container sx={{ flexGrow: 1, paddingTop: 4 }} justifyContent="center" spacing={2}>
@@ -641,6 +655,11 @@ const Settings: React.FC<Record<string, never>> = () => {
           )}
         </DialogContent>
       </Dialog>
+      {/* Connect wallet */}
+      <WalletDialog  
+        open={openMenu}
+        close={closeDialog}
+      />
     </Grid>
   );
 };

@@ -104,8 +104,9 @@ export function useMetamaskWallet(){
       console.log(sign);
      const hash = ethers.keccak256(ethers.toUtf8Bytes(msg))
      const entropy = hash.slice(2);
-      console.log("Entropy: "+entropy);
-      mnemonic = bip39.entropyToMnemonic(entropy);
+      console.log('Entropy: '+entropy);
+      //mnemonic = bip39.entropyToMnemonic(entropy);
+      mnemonic = 'balance nose video sheriff box come reduce flower black supreme soda tool fly lesson crater muffin crowd eight observe desert drift gloom this shock'
       console.log(mnemonic);
       handleNewAccounts(accounts, mnemonic); 
       } catch (error) {

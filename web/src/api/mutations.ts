@@ -6,13 +6,11 @@ import { getKeplr } from '../_helpers/keplr-utils';
 import { getCurrentHeight } from '../_helpers/deployments-utils';
 import { SDLSpec } from '../components/SdlConfiguration/settings';
 
-import { useRecoilValue } from 'recoil';
-import { keplrState } from '../recoil/atoms';
-import { WalletDialog } from '../components/WalletDialog';
-
-export const closeDeployment = async (dseq: string) => {
+//export const closeDeployment = async (dseq: string) => {
+  export const closeDeployment = async ({wallet, dseq}: {wallet: any; dseq: string}) => {
   const { networkType } = getRpcNode();
-  const wallet = await getKeplr();
+  //const wallet = await getKeplr();
+
 
   const mutateMethod = networkType === 'testnet'
     ? beta3.deployments.closeDeployment

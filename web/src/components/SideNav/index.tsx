@@ -17,53 +17,49 @@ import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import Stack from '@mui/material/Stack';
 import { appVersion } from '../../recoil/atoms';
 import { Icon } from '../Icons';
-import { Avatar, Button, Chip, Typography } from '@mui/material';
+import { Avatar, Button, Chip, ListItemIcon, Menu, MenuItem, Tooltip, Typography } from '@mui/material';
 import { useWallet } from '../../hooks/useWallet';
 import { useMetamaskWallet } from '../../hooks/useMetamaskWallet';
 import { HelpCenterSideHelp } from '../../components/HelpCenter/HelpCenterSideHelp';
 import { showKeplrWindow, keplrState } from '../../recoil/atoms';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import Loading from '../Loading';
-
-/*import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemAvatar from '@mui/material/ListItemAvatar';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemText from '@mui/material/ListItemText';*/
 import { WalletDialog } from '../WalletDialog';
-import { IconMetamask, IconKeplr, IconLogoAkash } from '../Icons';
-import { shortenString } from '../../_helpers/addresses';
+import { IconLogoAkash } from '../Icons';
+import { shortenString, shortenAddress } from '../../_helpers/addresses';
 import Blockies from 'react-18-blockies';
 import { getAccountBalance } from '../../recoil/api/bank';
 import { uaktToAKT } from '../../_helpers/lease-calculations';
+import Logout from '@mui/icons-material/Logout';
+import QrCodeIcon from '@mui/icons-material/QrCode';
+import CallReceivedIcon from '@mui/icons-material/CallReceived';
+import CallMadeIcon from '@mui/icons-material/CallMade';
+import { Title, Text } from '../../components/Text';
+import { SwapDialog } from '../SwapDialog';
 
-/*const wallets = ['Keplr', 'Metamask'];
-
-const getIcon = (wallet: String) => {
-  switch (wallet) {
-    case 'Keplr':
-      return <IconKeplr />;
-    case 'Metamask':
-      return <IconMetamask />;
-    default:
-      return null
-  }
-};*/
 
 export default function SideNav(props: any) {
   const { children } = props;
   const version = useRecoilValue(appVersion);
   const [open, setOpen] = React.useState(false);
+  const [openSwap, setOpenSwap] = React.useState(false);
   const location = useLocation();
   const pathnames = location.pathname.split('/').filter((x) => x);
-  //const wallet = useWallet();
- // const metamaskWallet = useMetamaskWallet();
   const [isHelpCenterOpen, setIsHelpCenterOpen] = useState(false);
   const [, setShowKeplrPopup] = useRecoilState(showKeplrWindow);
 
   const [openMenu, setOpenMenu] = React.useState(false);
   const [keplr, setKeplr] = useRecoilState(keplrState);
   const [balance, setBalance] = React.useState(0);
+
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const openAccountMenu = Boolean(anchorEl);
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
 
   React.useEffect(() => {
@@ -78,38 +74,22 @@ export default function SideNav(props: any) {
     }
   }, [keplr]);
 
-  /*const handleListItemClick = (value: string) => {
-    switch (value) {
-      case 'Keplr':
-        wallet.connect();
-        break;
-      case 'Metamask':
-        metamaskWallet.connect();
-        break;
-      default:
-        break;
-    }
-
-  };*/
-
-  const handleDisconnectWallet = () => {
-    localStorage.setItem('walletConnected', 'false');
-    setKeplr({
-      isSignedIn: false,
-      accounts: [],
-    });
-    setOpenMenu(false);
-  };
 
   const openDialog = () => {
-     setOpenMenu(true);
+    setOpenMenu(true);
   };
 
   const closeDialog = () => {
     setOpenMenu(false);
   };
+  const openSwapDialog = () => {
+    setOpenSwap(true);
+  };
 
-  
+  const closeSwapDialog = () => {
+    setOpenSwap(false);
+  };
+
 
   const toggleHelpCenter = useCallback(() => {
     setIsHelpCenterOpen((prevIsOpen: boolean) => !prevIsOpen);
@@ -137,16 +117,18 @@ export default function SideNav(props: any) {
     });
   };
 
-  /*const handleConnectWallet = () => {
-    wallet.connect();
-  };
-
-  const handleDisconnectWallet = () => {
-    wallet.disconnect();
-  };*/
 
   const handleShowKeplrHelp = () => {
     setShowKeplrPopup(true);
+  };
+
+
+  const handleDisconnectWallet = () => {
+    localStorage.setItem('walletConnected', 'false');
+    setKeplr({
+      isSignedIn: false,
+      accounts: [],
+    });
   };
 
   return (
@@ -177,14 +159,7 @@ export default function SideNav(props: any) {
           {keplr.isSignedIn && keplr?.accounts[0]?.address/*wallet.isConnected*/ ? (
             <>
               <Stack direction='row' justifyContent='center' alignItems='center' spacing={1} sx={{ mr: '20px' }}>
-                <Avatar>
-                  <Blockies
-                    seed={keplr?.accounts[0]?.address}
-                    size={10}
-                    scale={4}
-                    className="identicon"
-                  />
-                </Avatar>
+
                 <Box >
                   <Typography variant='h4' sx={{ mb: 0 }}>{shortenString(keplr?.accounts[0]?.address || '')}</Typography>
                   <Chip
@@ -195,56 +170,115 @@ export default function SideNav(props: any) {
                     variant="outlined"
                   />
                 </Box>
-                <Divider orientation="vertical" variant="middle" flexItem />
-                <Button variant="outlined" size='small' sx={{height: '38px', pr:'20px'}}>
-                <Box marginRight="0.5rem">
-                  <AccountBalanceIcon sx={{height:'20px'}}/>
-                </Box>
-                Fund
-              </Button>
+                <Tooltip title="Account settings">
+                  <IconButton
+                    onClick={handleClick}
+                    size="small"
+                    sx={{ ml: 2 }}
+                    aria-controls={open ? 'account-menu' : undefined}
+                    aria-haspopup="true"
+                    aria-expanded={open ? 'true' : undefined}
+                  >
+                    <Avatar>
+                      <Blockies
+                        seed={keplr?.accounts[0]?.address}
+                        size={10}
+                        scale={4}
+                        className="identicon"
+                      />
+                    </Avatar>
+                  </IconButton>
+                </Tooltip>
               </Stack>
-              <Button variant="outlined" onClick={handleDisconnectWallet}>
-                <Box marginRight="0.5rem">
-                  <Icon type="wallet" />
-                </Box>
-                Disconnect Wallet
-              </Button>
-              <StyledHelpIcon onClick={handleShowKeplrHelp} />
+              <Menu
+                anchorEl={anchorEl}
+                id="account-menu"
+                open={openAccountMenu}
+                onClose={handleClose}
+                onClick={handleClose}
+                PaperProps={{
+                  elevation: 0,
+                  sx: {
+                    width: 250,
+                    overflow: 'visible',
+                    filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                    mt: 1.5,
+                    '& .MuiAvatar-root': {
+                      width: 36,
+                      height: 36,
+                      ml: -0.5,
+                      mr: 1,
+                    },
+                    '&:before': {
+                      content: '""',
+                      display: 'block',
+                      position: 'absolute',
+                      top: 0,
+                      right: 14,
+                      width: 10,
+                      height: 10,
+                      bgcolor: 'background.paper',
+                      transform: 'translateY(-50%) rotate(45deg)',
+                      zIndex: 0,
+                    },
+                  },
+                }}
+                transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+              >
+                <Stack direction={"column"} spacing={1} sx={{ mb: '10px' }}>
+                  <Title size={14}>Nested EVM parent account</Title>
+                  <Stack sx={{ pl: '20px' }} direction='row' justifyContent='start' alignItems='center' spacing={0}>
+                    <Avatar> </Avatar>
+                    <Box>
+                      <Text size={14}>{shortenAddress(/*keplr?.accounts[0]?.address ||*/ '0x52554BAC165189131b37Cabc50af75aF3cBbfbc1')}</Text>
+                    </Box>
+                  </Stack>
+                </Stack>
+                <Divider />
+                <MenuItem>
+                  <ListItemIcon>
+                    <QrCodeIcon fontSize="medium" />
+                  </ListItemIcon>
+                  Qr Code
+                </MenuItem>
+                <MenuItem onClick={openSwapDialog}>
+                  <ListItemIcon>
+                    <CallReceivedIcon fontSize="medium" />
+                  </ListItemIcon>
+                  Fund
+                </MenuItem>
+                <MenuItem>
+                  <ListItemIcon>
+                    <CallMadeIcon fontSize="medium" />
+                  </ListItemIcon>
+                  Withdraw
+                </MenuItem>
+                <MenuItem onClick={handleDisconnectWallet}>
+                  <ListItemIcon>
+                    <Logout fontSize="medium" />
+                  </ListItemIcon>
+                  Logout
+                </MenuItem>
+              </Menu>
             </>
           ) : (
             <>
+
               <Button
                 variant="outlined"
-                onClick={openDialog}>
+                //onClick={openDialog}
+                onClick={openSwapDialog}
+              >
                 <Box marginRight="0.5rem">
                   <Icon type="wallet" />
                 </Box>
                 Connect Wallet
               </Button>
-               <WalletDialog  
-               open={openMenu}
-               close={closeDialog}
-               //onClose={handleClose}
-              />
-         {/*      <WalletDialog
-                close={handleClose}
+              <WalletDialog
                 open={openMenu}
-                title='Choose your wallet'
-              >
-                <List sx={{ pt: 0 }}>
-                  {wallets.map((wallet) => (
-                    <ListItem disableGutters key={wallet} >
-                      <ListItemButton onClick={() => handleListItemClick(wallet)} >
-                        <ListItemAvatar>
-                          {getIcon(wallet)}
-                        </ListItemAvatar>
-                        <ListItemText primary={wallet} sx={{ ml: '20px' }} />
-                      </ListItemButton>
-                    </ListItem>
-                  ))}
-                </List>
-              </WalletDialog> */}
-
+                close={closeDialog}
+              />
               <StyledHelpIcon onClick={handleShowKeplrHelp} />
             </>
           )}
@@ -333,6 +367,10 @@ export default function SideNav(props: any) {
         </Suspense>
       </Box>
       <HelpCenterSideHelp isOpen={isHelpCenterOpen} onClose={toggleHelpCenter} />
+      <SwapDialog
+        open={openSwap}
+        close={closeSwapDialog}
+      />
     </Stack>
   );
 }

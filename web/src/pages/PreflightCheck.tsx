@@ -156,8 +156,6 @@ export const PreflightCheck: React.FC<Record<string, never>> = () => {
       setOpenMenu(true);
       return;
     }
-    //if keplr.offlineSigner || keplr.cosmosClient
-    console.log("creation in progress......");
     mxCreateCertificate((/*{} as any*/ keplr), {
       onSuccess: async (result: any) => {
         setCertificate(await loadActiveCertificate(keplr?.accounts[0]?.address));
@@ -388,7 +386,6 @@ export const PreflightCheck: React.FC<Record<string, never>> = () => {
       <WalletDialog  
         open={openMenu}
         close={closeDialog}
-        //onClose={handleCreateCertificate}
       />
     </Box>
   );

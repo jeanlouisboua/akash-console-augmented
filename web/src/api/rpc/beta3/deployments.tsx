@@ -267,13 +267,43 @@ export async function fundDeployment(
 }
 
 export async function closeDeployment(wallet: KeplrWallet, deploymentId: { dseq: number, owner: string }) {
+  let client: SigningStargateClient;
+  let fee: any;
+  
   const [account] = wallet.accounts;
   const signer = wallet.offlineSigner;
   const { rpcNode } = getRpcNode();
 
   if (!signer || !deploymentId) return;
+  
+  if (wallet.cosmosClient){
+    client = await getMsgClient(rpcNode, signer);
+    fee = 'auto';
+  } else {
 
-  const client = await getMsgClient(rpcNode, signer);
+    const myRegistry = new Registry(
+      getAkashTypeRegistry()
+    );
+  
+    client = await SigningStargateClient.connectWithSigner(
+      rpcNode,
+      signer,
+      {
+        registry: myRegistry
+      }
+    );
+    fee = {
+      amount: [
+          {
+              denom: "uakt",
+              amount: "20000",
+          },
+      ],
+      gas: "800000",
+    };
+  }
+  
+
   const msg = {
     typeUrl: getTypeUrl(MsgCloseDeployment),
     value: MsgCloseDeployment.fromPartial({
@@ -281,7 +311,7 @@ export async function closeDeployment(wallet: KeplrWallet, deploymentId: { dseq:
     }),
   };
 
-  return client.signAndBroadcast(account.address, [msg], 'auto', 'Close deployment');
+  return client.signAndBroadcast(account.address, [msg], fee, 'Close deployment');
 }
 
 export async function createDeployment(
@@ -323,13 +353,15 @@ export async function createDeployment(
     return Promise.reject('Unable to initialize signing client');
   }
 
-  if ( wallet.cosmosClient) {
+  if (wallet.cosmosClient) {
     client = await getMsgClient(rpcNode, signer);
     fee = 'auto';
   } else {
+
     const myRegistry = new Registry(
       getAkashTypeRegistry()
     );
+    console.log("registry", myRegistry);
     client = await SigningStargateClient.connectWithSigner(
       rpcNode,
       signer,
@@ -337,19 +369,21 @@ export async function createDeployment(
         registry: myRegistry
       }
     );
-    const gas = await client.simulate(
+  
+  
+   /* const gas = await client.simulate(
       account.address,
       [msg],
       "Creating the deployment"
     );
     console.log("Estimated gas: ",gas);
     const adjustedGAS = gas * AKASH_GAS_ADJUSTMENT;
-    console.log("Adjusted gas: ",adjustedGAS);
+    console.log("Adjusted gas: ",adjustedGAS);*/
     fee = {
       amount: [
           {
               denom: "uakt",
-              amount: adjustedGAS,
+              amount: "20000",
           },
       ],
       gas: "800000",

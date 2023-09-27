@@ -10,6 +10,7 @@ import { PlaceholderCard } from '../components/PlaceholderCard';
 import { Icon } from '../components/Icons';
 import { useNavigate } from 'react-router-dom';
 import { useWallet } from '../hooks/useWallet';
+import { WalletDialog } from '../components/WalletDialog';
 
 type MyDeploymentsPlaceholderProps = {
   hidden: number;
@@ -17,15 +18,28 @@ type MyDeploymentsPlaceholderProps = {
 
 const MyDeploymentsPlaceholder: React.FC<MyDeploymentsPlaceholderProps> = ({ hidden }) => {
   const navigate = useNavigate();
-  const { isConnected, connect } = useWallet();
+  //const { isConnected, connect } = useWallet();
+  const keplr = useRecoilValue(keplrState);
+  const [openMenu, setOpenMenu] = React.useState(false);
 
   const handleCreateDeployment = () => {
     navigate('/landing/node-deployment');
   };
 
   const handleConnectWallet = () => {
-    connect();
+    //connect();
+    setOpenMenu(true);
   };
+
+  const closeDialog = () => {
+    setOpenMenu(false);
+  };
+
+  React.useEffect(() => {
+    if (keplr.isSignedIn && keplr?.accounts[0]?.address) {
+      setOpenMenu(false);
+    }
+  }, [keplr]);
 
   return (
     <PlaceholderCard icon="newDeploy" title="Nothing here yet">
@@ -45,7 +59,7 @@ const MyDeploymentsPlaceholder: React.FC<MyDeploymentsPlaceholderProps> = ({ hid
         )}
       </Typography>
       <Stack direction="row" padding="1.5rem" gap="1rem" justifyContent="center">
-        {isConnected ? (
+        {/*isConnected*/ keplr.isSignedIn ? (
           <Button variant="contained" onClick={handleCreateDeployment}>
             <Box paddingRight="0.5rem">
               <Icon type="add" />
@@ -58,6 +72,10 @@ const MyDeploymentsPlaceholder: React.FC<MyDeploymentsPlaceholderProps> = ({ hid
           </Button>
         )}
       </Stack>
+      <WalletDialog
+        open={openMenu}
+        close={closeDialog}
+      />
     </PlaceholderCard>
   );
 };

@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import styled from '@emotion/styled';
 import { Button, ButtonProps, Input } from '@mui/material';
 import { Deployment } from '@akashnetwork/akashjs/build/protobuf/akash/deployment/v1beta2/deployment';
-import { deploymentDataStale, KeplrWallet, optIntoAnalytics } from '../../recoil/atoms';
+import { deploymentDataStale, keplrState, KeplrWallet, optIntoAnalytics } from '../../recoil/atoms';
 import { updateStr } from '../../_helpers/callback-utils';
 import { Icon, IconType } from '../Icons';
 import { Prompt } from '../Prompt';
@@ -39,6 +39,7 @@ export const CloseDeploymentButton: React.FC<CloseDeploymentButtonProps> = ({
   const [name, setName] = React.useState('');
   const [optInto] = useRecoilState(optIntoAnalytics);
   const [, setDeploymentsStale] = useRecoilState(deploymentDataStale);
+  const keplr = useRecoilValue(keplrState);
   const { mutate: mxCloseDeployment, isLoading: showProgress } = useMutation(closeDeployment);
 
   const onButtonClick = React.useCallback(() => {
@@ -58,7 +59,7 @@ export const CloseDeploymentButton: React.FC<CloseDeploymentButtonProps> = ({
     if (name !== '' && name === deployment.deploymentId?.dseq.toString()) {
       await pendo(deployment.deploymentId?.dseq.low, 'close_deployment', optInto);
 
-      mxCloseDeployment(deployment.deploymentId.dseq.toString(), {
+      mxCloseDeployment({wallet: keplr, dseq: deployment.deploymentId.dseq.toString()}, {
         onSuccess: () => {
           setDeploymentsStale(true);
           cleanupState();
