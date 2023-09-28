@@ -8,7 +8,7 @@ import {
   Typography,
   Stack
 } from '@mui/material';
-import DotLoader from "react-spinners/DotLoader";
+import DotLoader from 'react-spinners/DotLoader';
 import CloseIcon from '@mui/icons-material/Close';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 import List from '@mui/material/List';
@@ -19,13 +19,13 @@ import ListItemText from '@mui/material/ListItemText';
 import Slide from '@mui/material/Slide';
 import { TransitionProps } from '@mui/material/transitions';
 
-import { useWallet } from "../../hooks/useWallet";
-import { useMetamaskWallet } from "../../hooks/useMetamaskWallet";
+import { useWallet } from '../../hooks/useWallet';
+import { useMetamaskWallet } from '../../hooks/useMetamaskWallet';
 import { useRecoilState } from 'recoil';
 import { keplrState } from '../../recoil/atoms';
 
 import { Text, Title } from '../../components/Text';
-import { IconKeplr, IconMetamask } from "../Icons";
+import { IconKeplr, IconMetamask } from '../Icons';
 import React, { useEffect } from 'react';
 
 const wallets = ['Keplr', 'Metamask'];
@@ -36,7 +36,7 @@ const Transition = React.forwardRef(function Transition(
   },
   ref: React.Ref<unknown>,
 ) {
-  return <Slide direction="down" ref={ref} {...props} />;
+  return <Slide direction='down' ref={ref} {...props} />;
 });
 
 const getIcon = (wallet: String) => {
@@ -64,7 +64,7 @@ export const WalletDialog = (props: DialogProps) => {
   const [keplr, setKeplr] = useRecoilState(keplrState);
   const metamaskWallet = useMetamaskWallet();
   //const [openMenu, setOpenMenu] = React.useState(open);
-  const [selectedWallet, setSelectedWallet] = React.useState("");
+  const [selectedWallet, setSelectedWallet] = React.useState('');
 
   const handleListItemClick = (value: string) => {
     setSelectedWallet(value);
@@ -96,7 +96,7 @@ export const WalletDialog = (props: DialogProps) => {
 
 
   const handleClose = (event: any, reason: any) => {
-    if (reason && reason == "backdropClick")
+    if (reason && reason == 'backdropClick')
     return;
   }
 
@@ -104,16 +104,16 @@ export const WalletDialog = (props: DialogProps) => {
     <MuiDialog
       TransitionComponent={Transition}
       fullWidth={true}
-      maxWidth="xs"
+      maxWidth='xs'
       disableEscapeKeyDown={true}
-      aria-labelledby="wallet-dialog-title"
+      aria-labelledby='wallet-dialog-title'
       open={open}
       onClose={handleClose}
     >
-         <DialogTitle id="wallet-dialog-title">
+         <DialogTitle id='wallet-dialog-title'>
          {keplr.isConnecting ? 
        <IconButton
-          aria-label="back"
+          aria-label='back'
           onClick={handleBack}
           size='small'
         >
@@ -125,7 +125,7 @@ export const WalletDialog = (props: DialogProps) => {
         }
          </DialogTitle>
       <IconButton
-          aria-label="close"
+          aria-label='close'
           onClick={close}
           sx={{
             position: 'absolute',

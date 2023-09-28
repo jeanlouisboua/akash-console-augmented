@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { FormEvent, useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
 import {
@@ -33,13 +33,17 @@ import ListItemText from '@mui/material/ListItemText';
 import Slide from '@mui/material/Slide';
 import { TransitionProps } from '@mui/material/transitions';
 
-import { useWallet } from "../../hooks/useWallet";
-import { useMetamaskWallet } from "../../hooks/useMetamaskWallet";
+import { useWallet } from '../../hooks/useWallet';
+import { useMetamaskWallet } from '../../hooks/useMetamaskWallet';
 import { useRecoilState } from 'recoil';
 import { keplrState } from '../../recoil/atoms';
 
 import { Text, Title } from '../../components/Text';
-import { IconLogoAkash } from "../Icons";
+import { IconLogoAkash } from '../Icons';
+import axios from 'axios';
+import { upperCase } from 'lodash';
+
+const baseUrl = 'https://storage.swapspace.co';
 
 const validationSchema = yup.object({
   amount: yup
@@ -48,13 +52,26 @@ const validationSchema = yup.object({
 });
 
 const countries = [
-  { value: "MG", label: "ETH", icon: "https://storage.swapspace.co/static/font/src/eth.svg" },
-  { value: "UE", label: "BTC", icon: "https://storage.swapspace.co/static/font/src/btc.svg" }
+  { value: 'MG', label: 'ETH', icon: 'https://storage.swapspace.co/static/font/src/eth.svg' },
+  { value: 'UE', label: 'BTC', icon: 'https://storage.swapspace.co/static/font/src/btc.svg' }
 ];
 
+interface Currency {
+  code: string
+  contractAddress: string
+  deposit: boolean
+  extraIdName: string
+  hasExtraId: boolean
+  icon: string
+  id: string
+  name: string
+  network: string
+  popular: boolean
+  validationRegexp: string
+  withdrawal: boolean
+}
 
-
-export interface DialogProps extends MuiDialogProps {
+interface DialogProps extends MuiDialogProps {
   open: boolean;
   close: () => void;
 }
@@ -63,18 +80,22 @@ export interface DialogProps extends MuiDialogProps {
 export const SwapDialog = (props: DialogProps) => {
   const { open, close } = props;
   const [keplr, setKeplr] = useRecoilState(keplrState);
-  const [data, setData] = useState({});
   //const wallet = useWallet();
   const metamaskWallet = useMetamaskWallet();
-  const [crypto, setCrypto] = React.useState<any>({ value: "MG", label: "ETH", icon: "https://storage.swapspace.co/static/font/src/eth.svg" });
-  
-  const handleChange = (event: SelectChangeEvent<typeof crypto>) => {
-    setCrypto(event.target.value);
-    console.log(crypto);
+  //const [crypto, setCrypto] = React.useState<any>({});
+  const [currencies, setCurrencies] = React.useState<Currency[]>([]);
+  const [bestAmount, setBestAmount] = React.useState<any>({});
+
+  let key = 0;
+
+  const handleOnChange = (event: FormEvent) => {
+    if(formik.values.amount && formik.values.crypto){
+      getBestAmount();
+    }
   };
 
   const handleClose = (event: any, reason: any) => {
-    if (reason && reason == "backdropClick")
+    if (reason && reason == 'backdropClick')
       return;
   }
 
@@ -82,22 +103,142 @@ export const SwapDialog = (props: DialogProps) => {
   const formik = useFormik({
     initialValues: {
       amount: 1,
+      crypto : {
+        name: "Ethereum",
+        icon: "/static/font/src/eth.svg",
+        deposit: true,
+        withdrawal: true,
+        validationRegexp: "/^(0x)[0-9A-Fa-f]{40}$/",
+        code: "eth",
+        network: "eth",
+        hasExtraId: false,
+        id: "qfXXh1jpc2",
+        extraIdName: "",
+        contractAddress: "",
+        popular: true
+    }
     },
     validationSchema: validationSchema,
     onSubmit: (values) => {
-      alert(JSON.stringify(values, null, 2));
+      //alert(JSON.stringify(values, null, 2));
+      console.log("Values: ",values);
+      getBestAmount();
+      //getEstimatedAmount();
     },
+  
   });
+  const getEstimatedAmount = async () => {
+    await axios({
+      method: 'get',
+      url: 'https://api.swapspace.co/api/v2/amounts',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': process.env.REACT_APP_SWAPSPACE_API_KEY!
+      },
+      params:{
+        fromCurrency: formik.values.crypto.code,
+        fromNetwork: formik.values.crypto.network,
+        toNetwork: 'akt',
+        toCurrency: 'akt',
+        amount: formik.values.amount,
+      }
+    }).then(async(response) => {
+      console.log("Estimation", response);
+      if(response.status == 200){
+        //const bestAmount = await (response.data).filter((offer: any)=>{ offer});
+      }
+        
+        //setBestAmount(response.data.toAmount);
+    });
+  }
+
+  const getBestAmount = async () => {
+    await axios({
+      method: 'get',
+      url: 'https://api.swapspace.co/api/v2/amounts/best',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': process.env.REACT_APP_SWAPSPACE_API_KEY!
+      },
+      params:{
+        fromCurrency: formik.values.crypto.code,
+        fromNetwork: formik.values.crypto.network,
+        toNetwork: 'akt',
+        toCurrency: 'akt',
+        amount: formik.values.amount,
+      }
+    }).then((response) => {
+      console.log("Estimation", response);
+      if(response.status == 200){
+        console.log("Best Estimation", response.data);
+        setBestAmount(response.data);
+      }
+    });
+  }
+
+  const createExchange = async () => {
+    await axios({
+      method: 'post',
+      url: 'https://api.swapspace.co/api/v2/exchange',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': process.env.REACT_APP_SWAPSPACE_API_KEY!
+      },
+      params:{
+        partner: bestAmount.partner,
+        fromCurrency: formik.values.crypto.code,
+        fromNetwork: formik.values.crypto.network,
+        toNetwork: 'akt',
+        toCurrency: 'akt',
+        address: keplr.accounts[0].address,
+        amount: formik.values.amount,
+        fixed: false,
+        extraId: "",
+        rateId: "",
+        userIp: "8.8.8.8",
+        refund: "1F1tAaz5x1HUXrCNLbtMDqcw6o5GNn4xqX"
+      }
+    }).then((response) => {
+      
+      if(response.status == 200){
+        
+      }
+    });
+  }
+ 
+  useEffect(() => {
+    const getCurrenciesList = async () => {
+      await axios({
+        method: 'get',
+        url: 'https://api.swapspace.co/api/v2/currencies',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': process.env.REACT_APP_SWAPSPACE_API_KEY!
+        }
+      }).then(async (response) => {
+        console.log('Response',response.data);
+        const currencyList = response.data;
+        const popularCrypto = await currencyList.filter((currency: any) => currency.popular === true);
+        console.log('Popular',popularCrypto);
+        setCurrencies([...popularCrypto]);
+      });
+      console.log('List',currencies);
+    }
+    getCurrenciesList();
+  }, []);
 
   return (
     <MuiDialog
       fullWidth={true}
-      maxWidth="xs"
+      maxWidth='xs'
       onClose={handleClose}
       open={open}>
       <DialogTitle>Fund Account</DialogTitle>
       <IconButton
-        aria-label="close"
+        aria-label='close'
         onClick={close}
         sx={{
           position: 'absolute',
@@ -108,75 +249,89 @@ export const SwapDialog = (props: DialogProps) => {
       >
         <CloseIcon />
       </IconButton>
-      <form onSubmit={formik.handleSubmit}>
+      <form onSubmit={formik.handleSubmit} onChange={handleOnChange} >
         <DialogContent>
           <Typography variant='h4'>You Send</Typography>
-          <Stack sx={{ backgroundColor: "#66666615", p: '10px' }} direction={'row'} alignItems={'center'} justifyContent={'space-between'}>
+          <Stack sx={{ backgroundColor: '#66666615', p: '10px' }} direction={'row'} alignItems={'center'} justifyContent={'space-between'}>
             <FormControl fullWidth error={Boolean(formik.touched.amount && formik.errors.amount)}>
               <TextField
                 fullWidth
                 required
                 name='amount'
-                id="standard-number"
-                label="amount"
-                type="number"
+                id='standard-number'
+                label='amount'
+                type='number'
                 InputLabelProps={{
                   shrink: true,
                 }}
-                variant="standard"
+                variant='standard'
                 value={formik.values.amount}
                 onChange={formik.handleChange}
               />
               {formik.touched.amount && formik.errors.amount && (
-                <FormHelperText error id="standard-weight-helper-text--title">
+                <FormHelperText error id='standard-weight-helper-text--title'>
                   {formik.errors.amount}
                 </FormHelperText>
               )}
             </FormControl>
-            <Divider orientation="vertical" sx={{ color: 'black' }} />
-            <FormControl sx={{ m: 1, minWidth: 150, width: 150 }}>
-              <InputLabel id="demo-dialog-select-label">Crypto</InputLabel>
+            <Divider orientation='vertical' sx={{ color: 'black' }} />
+            <FormControl sx={{ m: 1, minWidth: 150, width: 150 }} /*error={Boolean(formik.touched.crypto && formik.errors.crypto)}*/>
+              <InputLabel id='demo-dialog-select-label'>Crypto</InputLabel>
               <Select
-
-                labelId="demo-dialog-select-label"
-                id="demo-dialog-select"
-                defaultValue={crypto}
-                value={crypto}
-                onChange={handleChange}
-                input={<OutlinedInput label="Crypto" />}
-                renderValue={(selected) => (
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                    <Avatar src={selected.icon} sx={{ width: 24, height: 24 }} />
-                    <Typography>{selected.label}</Typography>
+                onClick={handleOnChange}
+                labelId='demo-dialog-select-label'
+                id='demo-dialog-select'
+                name='crypto'
+                defaultValue={formik.initialValues.crypto}
+                //value={countries[1]}
+                value={formik.values.crypto}
+                onChange={formik.handleChange}
+                input={<OutlinedInput label='Crypto' />}
+                renderValue={(selected: Currency) => (
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+                    <Avatar src={baseUrl + selected.icon} sx={{ width: 24, height: 24 }} />
+                    <Typography>{upperCase(selected.code)}</Typography>
                   </Box>
                 )}
-
+                MenuProps={{
+                  sx:{
+                    maxHeight: '500px'
+                  }
+                }}
               >
-                {countries.map((c) => (
-                  <MenuItem value={c as any}>
+               {currencies && currencies.map((c: Currency) => (
+                  <MenuItem value={c as any} key={key++}>
+                    <ListItemIcon>
+                      <Avatar src={baseUrl + c.icon} sx={{ width: 24, height: 24 }} />
+                    </ListItemIcon>
+                    {c.name}
+                  </MenuItem>
+                ))}
+
+{/* {countries.map((c) => (
+                  <MenuItem value={c as any} key={key++}>
                     <ListItemIcon>
                       <Avatar src={c.icon} sx={{ width: 24, height: 24 }} />
                     </ListItemIcon>
                     {c.label}
                   </MenuItem>
-                ))}
-
+                ))} */}
               </Select>
             </FormControl>
 
           </Stack>
           <Typography variant='h4' sx={{ mb: '20px', mt: '20px' }}>You get</Typography>
-          <Stack sx={{ backgroundColor: "#66666615", p: '20px' }} direction={'row'} alignItems={'center'} justifyContent={'space-between'}>
-            <Typography variant='h6'>{'4582'}</Typography>
+          <Stack sx={{ backgroundColor: '#66666615', p: '20px' }} direction={'row'} alignItems={'center'} justifyContent={'space-between'}>
+            <Typography variant='h6'>{bestAmount.toAmount}</Typography>
             <Box display={'flex'} flexDirection={'row'} justifyContent={'center'} alignContent={'center'} >
-              <Divider orientation="vertical" variant="fullWidth" flexItem sx={{ mr: '20px' }} />
+              <Divider orientation='vertical' variant='fullWidth' flexItem sx={{ mr: '20px' }} />
               <IconLogoAkash />
               <Typography variant='h6' sx={{ ml: '10px' }}>AKT</Typography>
             </Box>
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button variant='contained' type='submit'>View Offers</Button>
+          <Button variant='contained' type='submit'>Create Exchange</Button>
         </DialogActions>
       </form>
     </MuiDialog>

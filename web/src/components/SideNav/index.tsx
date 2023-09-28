@@ -133,29 +133,29 @@ export default function SideNav(props: any) {
 
   return (
     <Stack>
-      <AppBar position="fixed" open={open} color="default">
+      <AppBar position='fixed' open={open} color='default'>
         <Toolbar>
           <IconButton
-            id="icon_button_open_side_nav"
-            color="inherit"
-            aria-label="open drawer"
+            id='icon_button_open_side_nav'
+            color='inherit'
+            aria-label='open drawer'
             onClick={handleDrawerOpen}
-            edge="start"
+            edge='start'
             sx={{
               marginRight: 5,
               ...(open && { display: 'none' }),
             }}
           >
-            <Icon type="logoAkash" />
+            <Icon type='logoAkash' />
           </IconButton>
-          <Breadcrumbs aria-label="breadcrumb" separator={<NavigateNextIcon fontSize="small" />}>
+          <Breadcrumbs aria-label='breadcrumb' separator={<NavigateNextIcon fontSize='small' />}>
             {handlePathnames().map((obj: any, i: number) => (
               <Link to={obj.path} key={i}>
                 {obj.name}
               </Link>
             ))}
           </Breadcrumbs>
-          <div className="grow">{/* flex grow spacer */}</div>
+          <div className='grow'>{/* flex grow spacer */}</div>
           {keplr.isSignedIn && keplr?.accounts[0]?.address/*wallet.isConnected*/ ? (
             <>
               <Stack direction='row' justifyContent='center' alignItems='center' spacing={1} sx={{ mr: '20px' }}>
@@ -166,17 +166,17 @@ export default function SideNav(props: any) {
                     sx={{ pl: '5px', fontSize: '12px' }}
                     size='small'
                     avatar={<Avatar sx={{ backgroundColor: 'transparent' }}> <IconLogoAkash /> </Avatar>}
-                    label={balance + " AKT"}
-                    variant="outlined"
+                    label={balance + ' AKT'}
+                    variant='outlined'
                   />
                 </Box>
-                <Tooltip title="Account settings">
+                <Tooltip title='Account settings'>
                   <IconButton
                     onClick={handleClick}
-                    size="small"
+                    size='small'
                     sx={{ ml: 2 }}
                     aria-controls={open ? 'account-menu' : undefined}
-                    aria-haspopup="true"
+                    aria-haspopup='true'
                     aria-expanded={open ? 'true' : undefined}
                   >
                     <Avatar>
@@ -184,7 +184,7 @@ export default function SideNav(props: any) {
                         seed={keplr?.accounts[0]?.address}
                         size={10}
                         scale={4}
-                        className="identicon"
+                        className='identicon'
                       />
                     </Avatar>
                   </IconButton>
@@ -192,7 +192,7 @@ export default function SideNav(props: any) {
               </Stack>
               <Menu
                 anchorEl={anchorEl}
-                id="account-menu"
+                id='account-menu'
                 open={openAccountMenu}
                 onClose={handleClose}
                 onClick={handleClose}
@@ -226,7 +226,7 @@ export default function SideNav(props: any) {
                 transformOrigin={{ horizontal: 'right', vertical: 'top' }}
                 anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
               >
-                <Stack direction={"column"} spacing={1} sx={{ mb: '10px' }}>
+                <Stack direction={'column'} spacing={1} sx={{ mb: '10px' }}>
                   <Title size={14}>Nested EVM parent account</Title>
                   <Stack sx={{ pl: '20px' }} direction='row' justifyContent='start' alignItems='center' spacing={0}>
                     <Avatar> </Avatar>
@@ -238,25 +238,25 @@ export default function SideNav(props: any) {
                 <Divider />
                 <MenuItem>
                   <ListItemIcon>
-                    <QrCodeIcon fontSize="medium" />
+                    <QrCodeIcon fontSize='medium' />
                   </ListItemIcon>
                   Qr Code
                 </MenuItem>
                 <MenuItem onClick={openSwapDialog}>
                   <ListItemIcon>
-                    <CallReceivedIcon fontSize="medium" />
+                    <CallReceivedIcon fontSize='medium' />
                   </ListItemIcon>
                   Fund
                 </MenuItem>
                 <MenuItem>
                   <ListItemIcon>
-                    <CallMadeIcon fontSize="medium" />
+                    <CallMadeIcon fontSize='medium' />
                   </ListItemIcon>
                   Withdraw
                 </MenuItem>
                 <MenuItem onClick={handleDisconnectWallet}>
                   <ListItemIcon>
-                    <Logout fontSize="medium" />
+                    <Logout fontSize='medium' />
                   </ListItemIcon>
                   Logout
                 </MenuItem>
@@ -266,12 +266,12 @@ export default function SideNav(props: any) {
             <>
 
               <Button
-                variant="outlined"
+                variant='outlined'
                 //onClick={openDialog}
                 onClick={openSwapDialog}
               >
-                <Box marginRight="0.5rem">
-                  <Icon type="wallet" />
+                <Box marginRight='0.5rem'>
+                  <Icon type='wallet' />
                 </Box>
                 Connect Wallet
               </Button>
@@ -284,30 +284,30 @@ export default function SideNav(props: any) {
           )}
         </Toolbar>
       </AppBar>
-      <Drawer variant="permanent" open={open} id="drawer_side_nav">
+      <Drawer variant='permanent' open={open} id='drawer_side_nav'>
         <DrawerHeader>
-          <div className="flex items-center w-full">
-            <span className="mr-3">
-              <Icon type="logoAkashConsole" />
+          <div className='flex items-center w-full'>
+            <span className='mr-3'>
+              <Icon type='logoAkashConsole' />
             </span>
-            <div className="grow"></div>
-            <div id="button_close_side_nav" onClick={handleDrawerClose}>
-              <Icon type="close" />
+            <div className='grow'></div>
+            <div id='button_close_side_nav' onClick={handleDrawerClose}>
+              <Icon type='close' />
             </div>
           </div>
         </DrawerHeader>
         <Divider />
-        <Suspense fallback={<div className="pl-4">...</div>}>
+        <Suspense fallback={<div className='pl-4'>...</div>}>
           <Stack
-            direction="column"
-            justifyContent="flex-start"
-            alignItems="flex-start"
+            direction='column'
+            justifyContent='flex-start'
+            alignItems='flex-start'
             spacing={0}
-            height="100%"
-            paddingX="10px"
-            paddingY="10px"
+            height='100%'
+            paddingX='10px'
+            paddingY='10px'
           >
-            <Link to="landing" id="link_new_deployment">
+            <Link to='landing' id='link_new_deployment'>
               <SideNavMenuItemRed>
                 <AddIcon style={{ color: '#F43F5E' }} />
                 <SideNavMenuItemLabel style={{ color: '#F43F5E' }}>
@@ -316,28 +316,28 @@ export default function SideNav(props: any) {
               </SideNavMenuItemRed>
             </Link>
             <NavLink
-              to="my-deployments"
-              id="link_my_deployments"
+              to='my-deployments'
+              id='link_my_deployments'
               className={({ isActive }) => (isActive ? 'selected-active' : 'selected-inactive')}
             >
               <SideNavMenuItem>
                 <IconWrapper>
-                  <Icon type="deployments" />
+                  <Icon type='deployments' />
                 </IconWrapper>
                 <SideNavMenuItemLabel>My Deployments</SideNavMenuItemLabel>
               </SideNavMenuItem>
             </NavLink>
-            <div className="grow">
+            <div className='grow'>
               <button onClick={handleToggleDrawer} style={{ width: 260, height: '100%' }}></button>
             </div>
             <NavLink
-              to="settings"
-              id="link_settings"
+              to='settings'
+              id='link_settings'
               className={({ isActive }) => (isActive ? 'selected-active' : 'selected-inactive')}
             >
               <SideNavMenuItem>
                 <IconWrapper>
-                  <Icon type="settings" />
+                  <Icon type='settings' />
                 </IconWrapper>
                 <SideNavMenuItemLabel>Settings</SideNavMenuItemLabel>
               </SideNavMenuItem>
@@ -345,23 +345,23 @@ export default function SideNav(props: any) {
 
             <SideNavMenuItem id='link_help'>
               <IconWrapper onClick={toggleHelpCenter}>
-                <Icon type="help" />
+                <Icon type='help' />
               </IconWrapper>
               <SideNavMenuItemLabel>Help</SideNavMenuItemLabel>
             </SideNavMenuItem>
 
             <Typography
-              variant="caption"
-              component="p"
-              color="red"
-              marginTop="0.5rem"
+              variant='caption'
+              component='p'
+              color='red'
+              marginTop='0.5rem'
             >
               {`v${version}`}
             </Typography>
           </Stack>
         </Suspense>
       </Drawer>
-      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+      <Box component='main' sx={{ flexGrow: 1, p: 3 }}>
         <Suspense fallback={<Loading />}>
           {children}
         </Suspense>
