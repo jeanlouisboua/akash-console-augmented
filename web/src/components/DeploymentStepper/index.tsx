@@ -43,7 +43,8 @@ export interface DeploymentStepperProps {
 }
 
 const DeploymentStepper: React.FC<DeploymentStepperProps> = () => {
-  const keplr = useRecoilValue(keplrState);
+  //const keplr = useRecoilValue(keplrState);
+  const [keplr, setKeplr] = useRecoilState(keplrState);
   const navigate = useNavigate();
   const [deploymentId, setDeploymentId] = React.useState<{ owner: string; dseq: string }>();
   const { folderName, templateId, intentId, dseq } = useParams();
@@ -105,7 +106,7 @@ const DeploymentStepper: React.FC<DeploymentStepperProps> = () => {
   const acceptBid = async (bidId: any) => {
     setCardMessage('Deploying');
 
-    mxCreateLease(bidId, {
+    mxCreateLease({wallet: keplr,bidId: bidId}, {
       onSuccess: (lease) => {
         logging.success('Create lease: successful');
 
@@ -134,6 +135,11 @@ const DeploymentStepper: React.FC<DeploymentStepperProps> = () => {
             }
           );
         }
+          //refresh balance
+          setKeplr({
+            accounts: keplr.accounts,
+            isSignedIn: true
+          });
       },
       onError: (error) => {
         logging.log(`Failed to create lease: ${error}`);
@@ -201,6 +207,13 @@ const DeploymentStepper: React.FC<DeploymentStepperProps> = () => {
 
                 // head to the bid selection page
                 navigate(`/configure-deployment/${result.deploymentId.dseq}`);
+                
+                //refresh balance
+                setKeplr({
+                  accounts: keplr.accounts,
+                  isSignedIn: true
+                });
+                
               }
             })
             .catch((error) => handleError(error, 'createDeployment'));

@@ -7,7 +7,7 @@ import {
   SaveButton,
   UpdateDeploymentAction,
 } from '../components/UpdateDeployment/styling';
-import { useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import { keplrState } from '../recoil/atoms';
 import { Button } from '@mui/material';
 import { css } from '@emotion/react';
@@ -30,7 +30,8 @@ import { sendManifest, updateDeployment } from '../api/mutations';
 const UpdateDeployment: React.FC<any> = () => {
   const navigate = useNavigate();
   const { dseq } = useParams<{ dseq: string }>();
-  const keplr = useRecoilValue(keplrState);
+ //const keplr = useRecoilValue(keplrState);
+  const [keplr, setKeplr] = useRecoilState(keplrState);
   const [reviewSdl, showSdlReview] = useState(false);
   const closeReviewModal = useCallback(() => showSdlReview(false), []);
   const application = useAppCache(dseq);
@@ -114,6 +115,7 @@ const UpdateDeployment: React.FC<any> = () => {
         try {
           mxUpdateDeployment(
             {
+              wallet: keplr,
               deploymentId: {
                 owner: keplr.accounts[0].address,
                 dseq,
@@ -166,6 +168,11 @@ const UpdateDeployment: React.FC<any> = () => {
                     }
                   );
                 }
+                  //refresh balance
+          setKeplr({
+            accounts: keplr.accounts,
+            isSignedIn: true
+          });
               },
               onError: (error: any) => {
                 logging.error('UpdateDeployment.tsx' + error.message);

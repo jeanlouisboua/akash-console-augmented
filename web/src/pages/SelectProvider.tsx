@@ -114,7 +114,7 @@ export default function SelectProvider({
             checked={filterMethod === filterMethods.byAudit}
             onChange={toggleFilter}
           />
-          <Timer startTime={Date.now()} onTimerEnd={handleTimerExpire} />
+          <Timer startTime={Date.now()} onTimerEnd={handleTimerExpire} message='Bid'/>
         </div>
       </Box>
       <Divider className="mt-2 mb-4" />

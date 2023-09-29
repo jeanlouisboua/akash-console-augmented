@@ -82,8 +82,6 @@ export const createAndBroadcastCertificate = async (rpcEndpoint: string, wallet:
     };
   }
 
-
- 
   const certificate = await createCertificate(wallet.accounts[0].address);
   const [account] = wallet.accounts;
 
@@ -111,8 +109,37 @@ export const broadcastRevokeCertificate = async (
   wallet: any,
   certSerial: string
 ) => {
+  let client: SigningStargateClient;
+  let fee: any;
   const signer = wallet.offlineSigner;
-  const client = await getMsgClient(rpcEndpoint, signer);
+  //const client = await getMsgClient(rpcEndpoint, signer);
+  if (wallet.cosmosClient) {
+    client = await getMsgClient(rpcEndpoint, signer); 
+    fee = 'auto';
+  } else {
+    const myRegistry = new Registry(
+      getAkashTypeRegistry()
+    );
+    console.log("registry", myRegistry);
+    client = await SigningStargateClient.connectWithSigner(
+      rpcEndpoint,
+      signer,
+      {
+        registry: myRegistry
+      
+      }
+    );
+    console.log("Client",client);
+    fee = {
+      amount: [
+          {
+              denom: "uakt",
+              amount: "20000",
+          },
+      ],
+      gas: "800000",
+    };
+  }
   const [account] = wallet.accounts;
 
   const msg = {
@@ -125,7 +152,7 @@ export const broadcastRevokeCertificate = async (
     }),
   };
 
-  const tx = await client.signAndBroadcast(account.address, [msg], 'auto', 'Revoke certificate');
+  const tx = await client.signAndBroadcast(account.address, [msg], fee, 'Revoke certificate');
 
   if (tx.code !== undefined && tx.code === 0) {
     // TODO: remove certificate from local storage and update active serial

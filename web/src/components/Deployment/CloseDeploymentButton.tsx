@@ -39,7 +39,8 @@ export const CloseDeploymentButton: React.FC<CloseDeploymentButtonProps> = ({
   const [name, setName] = React.useState('');
   const [optInto] = useRecoilState(optIntoAnalytics);
   const [, setDeploymentsStale] = useRecoilState(deploymentDataStale);
-  const keplr = useRecoilValue(keplrState);
+    //const keplr = useRecoilValue(keplrState);
+    const [keplr, setKeplr] = useRecoilState(keplrState);
   const { mutate: mxCloseDeployment, isLoading: showProgress } = useMutation(closeDeployment);
 
   const onButtonClick = React.useCallback(() => {
@@ -64,6 +65,11 @@ export const CloseDeploymentButton: React.FC<CloseDeploymentButtonProps> = ({
           setDeploymentsStale(true);
           cleanupState();
           onDelete();
+           //refresh balance
+           setKeplr({
+            accounts: keplr.accounts,
+            isSignedIn: true
+          });
         },
         onError: (error: any) => {
           logging.error('Error closing deployment: ' + error);

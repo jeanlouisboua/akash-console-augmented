@@ -4,11 +4,13 @@ import * as React from 'react';
 interface TimerProps {
   startTime: number;
   onTimerEnd?: () => void;
+  message: string
+  eta?: number
 }
 
-export const Timer: React.FC<TimerProps> = ({ startTime, onTimerEnd }) => {
+export const Timer: React.FC<TimerProps> = ({ startTime, onTimerEnd, message, eta}) => {
   const [timeRemaining, setTimeRemaining] = React.useState<string | null>('Expired');
-  const duration = 60 * 5 * 1000;
+  const duration = eta || 60 * 5 * 1000;
 
   React.useEffect(() => {
     let timer: NodeJS.Timer | null = null;
@@ -42,7 +44,7 @@ export const Timer: React.FC<TimerProps> = ({ startTime, onTimerEnd }) => {
     <TimerWrapper>
       {timeRemaining !== null ? (
         <>
-          <Typography component="span">Time Left on Bid:</Typography>
+          <Typography component="span">Time Left on {message}:</Typography>
           <Typography
             component="span"
             sx={{ display: 'inline-block', width: '2.125rem', fontWeight: 700 }}
@@ -52,7 +54,7 @@ export const Timer: React.FC<TimerProps> = ({ startTime, onTimerEnd }) => {
         </>
       ) : (
         <>
-          <Typography component="span">Bid Expired</Typography>
+          <Typography component="span">{message} Expired</Typography>
         </>
       )}
     </TimerWrapper>

@@ -41,7 +41,7 @@ export function useMetamaskWallet(){
     };
     
     
-    async function handleNewAccounts(newAccounts?: any, mnemonic?: any) {
+    async function handleNewAccounts(newAccounts?: any, mnemonic?: any, network?: any) {
         accounts = newAccounts;
         if (accounts && accounts.length > 0) {
           const wallet = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, { prefix: "akash" });
@@ -56,6 +56,7 @@ export function useMetamaskWallet(){
             accounts:[...cosmosAccounts],
             offlineSigner: wallet,
             isSignedIn: true,
+            parent: {address: newAccounts[0], network: network},
             isConnecting: false
           });
 
@@ -90,10 +91,11 @@ export function useMetamaskWallet(){
       }).then(() => ethereum.request({
           method: 'eth_requestAccounts'
       }));
-      /*const provider = new ethers.BrowserProvider(ethereum!);
-      const offlineSigner = provider.getSigner();
+      const provider = new ethers.BrowserProvider(ethereum!);
+      //const offlineSigner = provider.getSigner();
       const network = await provider.getNetwork();
-      const balance = await provider.getBalance(accounts[0]);
+      console.log("Network", network);
+     /* const balance = await provider.getBalance(accounts[0]);
       console.log("Balance", balance);*/
       const msg = 'Akash console want to verify your identity, it\'s mandatory to approve.';
       const from = accounts[0];
@@ -105,10 +107,10 @@ export function useMetamaskWallet(){
      const hash = ethers.keccak256(ethers.toUtf8Bytes(msg))
      const entropy = hash.slice(2);
       console.log('Entropy: '+entropy);
-      //mnemonic = bip39.entropyToMnemonic(entropy);
-      mnemonic = 'balance nose video sheriff box come reduce flower black supreme soda tool fly lesson crater muffin crowd eight observe desert drift gloom this shock'
+      mnemonic = bip39.entropyToMnemonic(entropy);
+      //mnemonic = 'balance nose video sheriff box come reduce flower black supreme soda tool fly lesson crater muffin crowd eight observe desert drift gloom this shock'
       console.log(mnemonic);
-      handleNewAccounts(accounts, mnemonic); 
+      handleNewAccounts(accounts, mnemonic, network.name); 
       } catch (error) {
         console.log(error);
         setKeplr({

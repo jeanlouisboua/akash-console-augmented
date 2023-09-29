@@ -9,12 +9,18 @@ import { SDLSpec } from '../components/SdlConfiguration/settings';
 import { getRpcNode } from '../hooks/useRpcNode';
 import { debug } from 'console';
 
+interface Parent{
+  address: string,
+  network: string
+}
+
 export interface KeplrWallet {
   accounts: AccountData[];
   offlineSigner?: OfflineSigner;
   cosmosClient?: CosmosClient;
   isSignedIn: boolean;
   file?: string;
+  parent?: Parent
   isConnecting?: boolean;
 }
 

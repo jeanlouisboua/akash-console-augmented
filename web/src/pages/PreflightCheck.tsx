@@ -23,6 +23,7 @@ import { createCertificate } from '../api/mutations';
 import logging from '../logging';
 import { loadActiveCertificate } from '../api/rpc/beta3/certificates';
 import { WalletDialog } from '../components/WalletDialog';
+import { SwapDialog } from '../components/SwapDialog';
 
 export const PreflightCheck: React.FC<Record<string, never>> = () => {
   const [keplr] = useRecoilState(keplrState);
@@ -47,6 +48,15 @@ export const PreflightCheck: React.FC<Record<string, never>> = () => {
   const savedSDL = useRecoilValue(deploymentSdl);
 
   const [openMenu, setOpenMenu] = React.useState(false);
+  const [openSwap, setOpenSwap] = React.useState(false);
+
+  const openSwapDialog = () => {
+    setOpenSwap(true);
+  };
+
+  const closeSwapDialog = () => {
+    setOpenSwap(false);
+  };
 
   const closeDialog = () => {
     setOpenMenu(false);
@@ -137,7 +147,7 @@ export const PreflightCheck: React.FC<Record<string, never>> = () => {
 
   /* Check the current balance of the wallet */
   React.useEffect(() => {
-  //  if (!window.keplr) return;
+    //  if (!window.keplr) return;
     if (keplr.isSignedIn && keplr?.accounts[0]?.address) {
       const account = values.depositor || keplr.accounts[0].address;
       getAccountBalance(account).then((result) => {
@@ -152,7 +162,7 @@ export const PreflightCheck: React.FC<Record<string, never>> = () => {
   const handleCreateCertificate = async () => {
     // the query doesn't take any arguments, this little hack keeps
     // typescript happy
-    if (!keplr.isSignedIn && !keplr?.accounts[0]?.address ) {
+    if (!keplr.isSignedIn && !keplr?.accounts[0]?.address) {
       setOpenMenu(true);
       return;
     }
@@ -161,7 +171,7 @@ export const PreflightCheck: React.FC<Record<string, never>> = () => {
         setCertificate(await loadActiveCertificate(keplr?.accounts[0]?.address));
         setShowVerifiedCert(true);
         logging.success('Certificate created successfully');
-        
+
         refetchCertificates();
       },
       onError: (error: any) => {
@@ -254,6 +264,15 @@ export const PreflightCheck: React.FC<Record<string, never>> = () => {
                       Insufficient funds in your wallet
                     </Title>
                     <div className="grow">{/* spacer - do not remove */}</div>
+                    {keplr && !keplr.cosmosClient && keplr.isSignedIn && (
+                      <>
+                      <PreflightActionButton onClick={openSwapDialog}>
+                        Fund wallet
+                      </PreflightActionButton>
+                       <div className="grow">{/* spacer - do not remove */}</div>
+                       </>
+                    )}
+
                     <div className="flex gap-2">
                       <Label>Use Depositor</Label>
                       <AntSwitch checked={useAuthorizedDepositor} onChange={handleSwitchChange} />
@@ -383,9 +402,13 @@ export const PreflightCheck: React.FC<Record<string, never>> = () => {
           Next
         </Button>
       </DeploymentAction>
-      <WalletDialog  
+      <WalletDialog
         open={openMenu}
         close={closeDialog}
+      />
+      <SwapDialog
+        open={openSwap}
+        close={closeSwapDialog}
       />
     </Box>
   );

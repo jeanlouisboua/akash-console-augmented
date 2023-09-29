@@ -237,13 +237,42 @@ export async function fundDeployment(
   deploymentId: { dseq: number; owner: string },
   quantity: number
 ) {
+  let client: SigningStargateClient;
+  let fee: any; 
   const [account] = wallet.accounts;
   const signer = wallet.offlineSigner;
   const { rpcNode } = getRpcNode();
 
   if (!signer || !deploymentId) return;
 
-  const client = await getMsgClient(rpcNode, signer);
+  //const client = await getMsgClient(rpcNode, signer);
+  if (wallet.cosmosClient){
+    client = await getMsgClient(rpcNode, signer);
+    fee = 'auto';
+  } else {
+
+    const myRegistry = new Registry(
+      getAkashTypeRegistry()
+    );
+  
+    client = await SigningStargateClient.connectWithSigner(
+      rpcNode,
+      signer,
+      {
+        registry: myRegistry
+      }
+    );
+    fee = {
+      amount: [
+          {
+              denom: "uakt",
+              amount: "20000",
+          },
+      ],
+      gas: "800000",
+    };
+  }
+
   const amount = {
     denom: 'uakt',
     amount: quantity.toString(),
@@ -261,7 +290,8 @@ export async function fundDeployment(
   return client.signAndBroadcast(
     account.address,
     [msg],
-    'auto',
+    //'auto',
+    fee,
     `Send ${(quantity / 10 ** 6).toFixed(2)} AKT to deployment`
   );
 }
@@ -402,6 +432,8 @@ export async function createDeployment(
 }
 
 export async function updateDeployment(wallet: KeplrWallet, deploymentId: any, sdl: any) {
+  let client: SigningStargateClient;
+  let fee: any;
   const [account] = wallet.accounts;
   const signer = wallet.offlineSigner;
   const { rpcNode } = getRpcNode();
@@ -410,7 +442,33 @@ export async function updateDeployment(wallet: KeplrWallet, deploymentId: any, s
     return Promise.reject('Unable to initialize signing client');
   }
 
-  const client = await getMsgClient(rpcNode, signer);
+  //const client = await getMsgClient(rpcNode, signer);
+  if (wallet.cosmosClient){
+    client = await getMsgClient(rpcNode, signer);
+    fee = 'auto';
+  } else {
+
+    const myRegistry = new Registry(
+      getAkashTypeRegistry()
+    );
+  
+    client = await SigningStargateClient.connectWithSigner(
+      rpcNode,
+      signer,
+      {
+        registry: myRegistry
+      }
+    );
+    fee = {
+      amount: [
+          {
+              denom: "uakt",
+              amount: "20000",
+          },
+      ],
+      gas: "800000",
+    };
+  }
   const ver = await ManifestVersion(sdl, 'beta3');
 
   const msg = {
@@ -421,7 +479,7 @@ export async function updateDeployment(wallet: KeplrWallet, deploymentId: any, s
     }),
   };
 
-  const tx = await client.signAndBroadcast(account.address, [msg], 'auto', 'Update the deployment');
+  const tx = await client.signAndBroadcast(account.address, [msg], fee, 'Update the deployment');
 
   return {
     deploymentId,
@@ -430,13 +488,41 @@ export async function updateDeployment(wallet: KeplrWallet, deploymentId: any, s
 }
 
 export async function createLease(wallet: KeplrWallet, bidId: BidID) {
+  let client: SigningStargateClient;
+  let fee: any;
   const [account] = wallet.accounts;
   const signer = wallet.offlineSigner;
   const { rpcNode } = getRpcNode();
 
   if (!signer || !bidId) return;
 
-  const client = await getMsgClient(rpcNode, signer);
+  //const client = await getMsgClient(rpcNode, signer);
+  if (wallet.cosmosClient){
+    client = await getMsgClient(rpcNode, signer);
+    fee = 'auto';
+  } else {
+
+    const myRegistry = new Registry(
+      getAkashTypeRegistry()
+    );
+  
+    client = await SigningStargateClient.connectWithSigner(
+      rpcNode,
+      signer,
+      {
+        registry: myRegistry
+      }
+    );
+    fee = {
+      amount: [
+          {
+              denom: "uakt",
+              amount: "20000",
+          },
+      ],
+      gas: "800000",
+    };
+  }
   const msg = {
     typeUrl: getTypeUrl(MsgCreateLease),
     value: MsgCreateLease.fromJSON({
@@ -445,7 +531,7 @@ export async function createLease(wallet: KeplrWallet, bidId: BidID) {
   };
 
   return client
-    .signAndBroadcast(account.address, [msg], 'auto', 'Create lease for deployment')
+    .signAndBroadcast(account.address, [msg], fee, 'Create lease for deployment')
     .then(async () => {
       const rpc = await getRpc(rpcNode);
       const queryClient = new MarketClient(rpc);

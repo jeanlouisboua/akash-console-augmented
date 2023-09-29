@@ -126,7 +126,8 @@ const AddCustomChainButton: React.FC<{ chainId: string }> = ({ chainId }) => {
 };
 
 const Settings: React.FC<Record<string, never>> = () => {
-  const keplr = useRecoilValue(keplrState);
+  //const keplr = useRecoilValue(keplrState);
+  const [keplr, setKeplr] = useRecoilState(keplrState);
   const [currentActiveCertificate, setCurrentActiveCertificate] = useRecoilState(activeCertificate);
   const [certificatesList, setCertificatesList] = React.useState<
     (SortableCertificate & TLSCertificate)[]
@@ -212,12 +213,17 @@ const Settings: React.FC<Record<string, never>> = () => {
   const handleRevokeCertificate = React.useCallback(async () => {
     setShowProgress(true);
 
-    mxRevokeCertificate(revokeCert, {
+    mxRevokeCertificate({wallet: keplr, certificate: revokeCert}, {
       onSuccess: () => {
         refetch();
         setRevokeOpen(false);
         setShowProgress(false);
         setRevokeCert('');
+         //refresh balance
+         setKeplr({
+          accounts: keplr.accounts,
+          isSignedIn: true
+        });
       },
       onError: (error: any) => {
         logging.error('Failed to revoke certificate: ' + error);

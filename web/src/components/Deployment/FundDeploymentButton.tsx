@@ -1,4 +1,6 @@
 import * as React from 'react';
+import { useRecoilState} from 'recoil';
+import { keplrState } from '../../recoil/atoms';
 import styled from '@emotion/styled';
 import { Button, Input } from '@mui/material';
 import { Deployment } from '@akashnetwork/akashjs/build/protobuf/akash/deployment/v1beta2/deployment';
@@ -29,6 +31,7 @@ export const FundDeploymentButton: React.FC<FundDeploymentButtonProps> = ({
   wallet,
   children,
 }) => {
+  const [keplr, setKeplr] = useRecoilState(keplrState);
   const [open, setOpen] = React.useState(false);
   const [amount, setAmount] = React.useState(0);
   const [balance, setBalance] = React.useState(0);
@@ -55,8 +58,15 @@ export const FundDeploymentButton: React.FC<FundDeploymentButtonProps> = ({
     const dseq = deployment.deploymentId?.dseq?.toString();
 
     if (amount !== 0 && dseq !== undefined) {
-      mxFundDeployment({ dseq, amount: aktToUakt(amount) }, {
-        onSuccess: () => window.location.reload(),
+      mxFundDeployment({wallet: keplr, dseq, amount: aktToUakt(amount) }, {
+        onSuccess: () => {
+          window.location.reload();
+          //refresh balance
+          setKeplr({
+            accounts: keplr.accounts,
+            isSignedIn: true
+          });
+        },
         onError: (err: any) => logging.error(`Unable to send funds to deployment: ${err}`),
       });
     }

@@ -7,6 +7,8 @@ const initalState = {
   offlineSigner: undefined,
   cosmosClient: undefined,
   isSignedIn: false,
+  parent: undefined,
+  isConnecting: false,
   file: '_helpers/keplr-utils.ts',
 };
 

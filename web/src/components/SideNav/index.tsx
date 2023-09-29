@@ -36,7 +36,9 @@ import CallReceivedIcon from '@mui/icons-material/CallReceived';
 import CallMadeIcon from '@mui/icons-material/CallMade';
 import { Title, Text } from '../../components/Text';
 import { SwapDialog } from '../SwapDialog';
+import { upperCase } from 'lodash';
 
+const baseUrl = 'https://storage.swapspace.co/static/font/src/';
 
 export default function SideNav(props: any) {
   const { children } = props;
@@ -54,6 +56,7 @@ export default function SideNav(props: any) {
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const openAccountMenu = Boolean(anchorEl);
+  
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -72,6 +75,7 @@ export default function SideNav(props: any) {
       });
       setOpenMenu(false);
     }
+    console.log("Network: ",keplr?.parent?.network);
   }, [keplr]);
 
 
@@ -156,7 +160,7 @@ export default function SideNav(props: any) {
             ))}
           </Breadcrumbs>
           <div className='grow'>{/* flex grow spacer */}</div>
-          {keplr.isSignedIn && keplr?.accounts[0]?.address/*wallet.isConnected*/ ? (
+          {keplr && keplr.isSignedIn && keplr?.accounts[0]?.address/*wallet.isConnected*/ ? (
             <>
               <Stack direction='row' justifyContent='center' alignItems='center' spacing={1} sx={{ mr: '20px' }}>
 
@@ -226,34 +230,41 @@ export default function SideNav(props: any) {
                 transformOrigin={{ horizontal: 'right', vertical: 'top' }}
                 anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
               >
+                {keplr && !keplr.cosmosClient ?  
+                <>
                 <Stack direction={'column'} spacing={1} sx={{ mb: '10px' }}>
-                  <Title size={14}>Nested EVM parent account</Title>
+                  <Title size={14}>Nested EVM Parent Account</Title>
                   <Stack sx={{ pl: '20px' }} direction='row' justifyContent='start' alignItems='center' spacing={0}>
-                    <Avatar> </Avatar>
+                    <Avatar  src={baseUrl+ keplr?.parent?.network+'.svg'} sx={{width: 24, height: 24, backgroundColor: 'transparent'}}> </Avatar>
                     <Box>
-                      <Text size={14}>{shortenAddress(/*keplr?.accounts[0]?.address ||*/ '0x52554BAC165189131b37Cabc50af75aF3cBbfbc1')}</Text>
+                      <Text size={16}>{upperCase(keplr?.parent?.network)}</Text>
+                      <Text size={14}>{shortenAddress(keplr?.parent?.address || '')}</Text>
                     </Box>
                   </Stack>
                 </Stack>
                 <Divider />
-                <MenuItem>
+               {/*  <MenuItem>
                   <ListItemIcon>
                     <QrCodeIcon fontSize='medium' />
                   </ListItemIcon>
                   Qr Code
-                </MenuItem>
+                </MenuItem> */}
                 <MenuItem onClick={openSwapDialog}>
                   <ListItemIcon>
                     <CallReceivedIcon fontSize='medium' />
                   </ListItemIcon>
                   Fund
                 </MenuItem>
-                <MenuItem>
+                </>
+                :
+                ""
+                }
+             {/*    <MenuItem>
                   <ListItemIcon>
                     <CallMadeIcon fontSize='medium' />
                   </ListItemIcon>
                   Withdraw
-                </MenuItem>
+                </MenuItem> */}
                 <MenuItem onClick={handleDisconnectWallet}>
                   <ListItemIcon>
                     <Logout fontSize='medium' />
@@ -267,8 +278,8 @@ export default function SideNav(props: any) {
 
               <Button
                 variant='outlined'
-                //onClick={openDialog}
-                onClick={openSwapDialog}
+                onClick={openDialog}
+                //onClick={openSwapDialog}
               >
                 <Box marginRight='0.5rem'>
                   <Icon type='wallet' />
