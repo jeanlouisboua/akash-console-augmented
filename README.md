@@ -7,7 +7,7 @@ Akash Console Augmented is an improved release of akash console. A user-friendly
 </p>
 
 ## Demo
-Try a running instance at https://akash-console-augmented-jlabstudio.koyeb.app
+Try a running instance at https://ec2-54-183-202-174.us-west-1.compute.amazonaws.com
 
 ## Environment variables
 Add your [SWAPSPACE](https://swapspace.co/) api key to  .env  file
