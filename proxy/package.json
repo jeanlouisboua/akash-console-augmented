@@ -31,7 +31,7 @@
         "@types/ws": "^8.5.3"
     },
     "scripts": {
-        "start": "node ./src/index.js",
+        "start": "yarn build && node ./src/index.js",
         "dev": "nodemon ./src/index.ts",
         "dev-server": "tsc-watch --noClear -p ./tsconfig.json --onSuccess \"node ./src/index.js\"",
         "build": "tsc"
