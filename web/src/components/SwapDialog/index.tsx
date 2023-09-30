@@ -83,7 +83,7 @@ export const SwapDialog = (props: DialogProps) => {
   const [bestAmount, setBestAmount] = React.useState<any>({});
   const [isProcessing, setIsProcessing] = React.useState<boolean>(false);
   const [exchange, setExchange] = React.useState<any>({
-    "id": "78sZEDF457qa",
+    /*"id": "78sZEDF457qa",
     "partner": "simpleswap",
     "fixed": false,
     "timestamps": {
@@ -117,7 +117,7 @@ export const SwapDialog = (props: DialogProps) => {
     "blockExplorerAddressUrl": {
       "from": "",
       "to": "https://blockchair.com/ru/ethereum/address/0x32be343b94f860124dc4fee278fdcbd38c102d88"
-    }
+    }*/
   });
 
   let key = 0;
@@ -205,12 +205,14 @@ export const SwapDialog = (props: DialogProps) => {
         amount: formik.values.amount,
       }
     }).then((response) => {
-      console.log("Estimation", response);
+      //console.log("Estimation", response);
       if(response.status == 200){
         console.log("Best Estimation", response.data);
         setBestAmount(response.data);
       }
-    });
+    }).catch(function (error) {
+      console.log(error.toJSON());
+    });;
   }
 
   const createExchange = async () => {
@@ -241,7 +243,6 @@ export const SwapDialog = (props: DialogProps) => {
       if(response.status == 200){
         setExchange(response.data)
         setIsProcessing(true);
-        
       }
     });
   }
@@ -288,7 +289,7 @@ export const SwapDialog = (props: DialogProps) => {
       </IconButton>
       <form onSubmit={formik.handleSubmit} onChange={handleOnChange} >
         <DialogContent>
-          {!isProcessing ? 
+          {isProcessing ? 
           <Stack spacing={1}>
          
           <Stack direction='row' justifyContent='space-between' sx={{mb: '20px'}}>
@@ -420,9 +421,8 @@ export const SwapDialog = (props: DialogProps) => {
         }
         </DialogContent>
         <DialogActions>
-          {!isProcessing ? 
+          {isProcessing ? 
             <Stack direction='row' spacing={4} alignItems='center' justifyContent='center'>
-            {/* <Typography variant='subtitle2'>Deposite time: 00:00</Typography> */}
             <Timer startTime={Date.now()} onTimerEnd={handleTimerExpire} message='Deposit' eta={60*60*1000}/>
             <Button variant='contained'>Send</Button>
           </Stack> 
