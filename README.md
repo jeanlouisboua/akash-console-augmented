@@ -34,7 +34,7 @@ npm install -g yarn concurrently craco
 Then checkout, build and run Console
 ```
 git clone https://github.com/jeanlouisboua/akash-console-augmented.git
-cd console-0.1.304
+cd akash-console-augmented
 yarn install
 yarn dev
 ```

@@ -1,6 +1,6 @@
 {
     "scripts": {
-        "start": "concurrently --kill-others \"yarn dev:web\" \"yarn dev:proxy\"",
+        "dev": "concurrently --kill-others \"yarn dev:web\" \"yarn dev:proxy\"",
         "dev:web": "yarn workspace web start",
         "build:web": "yarn workspace web build",
         "dev:proxy": "yarn workspace proxy dev",
